@@ -7,7 +7,7 @@
 
 #include "version.h"
 
-class SignalHandler 
+class SignalHandler
 {
 public:
     SignalHandler(int mask = DEFAULT_SIGNALS);
@@ -100,7 +100,7 @@ int POSIX_logicalToPhysical(int signal)
     // bind it to a SIGTERM. Anyway the signal will never be raised
     case SignalHandler::SIG_CLOSE: return SIGTERM;
     case SignalHandler::SIG_RELOAD: return SIGHUP;
-    default: 
+    default:
         return -1; // SIG_ERR = -1
     }
 }
@@ -151,28 +151,28 @@ public:
         parser.addHelpOption();
 
         // Positional argument will specify a zcash payment URI
-        parser.addPositionalArgument("zcashURI", "An optional zcash URI to pay");
+        parser.addPositionalArgument("zcashURI", "An optional zero URI to pay");
 
         parser.process(a);
 
         // Check for a positional argument indicating a zcash payment URI
         if (a.isSecondary()) {
             if (parser.positionalArguments().length() > 0) {
-                a.sendMessage(parser.positionalArguments()[0].toUtf8());    
+                a.sendMessage(parser.positionalArguments()[0].toUtf8());
             }
             a.exit( 0 );
-            return 0;            
-        } 
+            return 0;
+        }
 
-        QCoreApplication::setOrganizationName("zecwallet-org");
-        QCoreApplication::setApplicationName("zecwallet");
+        QCoreApplication::setOrganizationName("zerocurrency.io");
+        QCoreApplication::setApplicationName("ZeroWallet Lite");
 
         QString locale = QLocale::system().name();
         locale.truncate(locale.lastIndexOf('_'));   // Get the language code
         qDebug() << "Loading locale " << locale;
-        
+
         QTranslator translator;
-        translator.load(QString(":/translations/res/zec_qt_wallet_") + locale);
+        translator.load(QString(":/translations/res/zer_qt_wallet_") + locale);
         a.installTranslator(&translator);
 
         QIcon icon(":/icons/res/icon.ico");
@@ -187,7 +187,7 @@ public:
     #if (QT_VERSION >= QT_VERSION_CHECK(5, 10, 0))
         unsigned int seed = QRandomGenerator::securelySeeded().generate();
     #else
-        // This will be used only during debugging for compatibility reasons 
+        // This will be used only during debugging for compatibility reasons
         unsigned int seed = std::time(0);
     #endif
         std::srand(seed);
@@ -202,10 +202,10 @@ public:
         }
 
         Settings::getInstance()->setUseEmbedded(false);
-        
+
 
         w = new MainWindow();
-        w->setWindowTitle("Zecwallet Lite v" + QString(APP_VERSION));
+        w->setWindowTitle("Zero Wallet Lite v" + QString(APP_VERSION));
 
         // If there was a payment URI on the command line, pay it
         if (parser.positionalArguments().length() > 0) {
@@ -217,8 +217,8 @@ public:
             QString uri(msg);
 
             // We need to execute this async, otherwise the app seems to crash for some reason.
-            QTimer::singleShot(1, [=]() { w->payZcashURI(uri); });            
-        });   
+            QTimer::singleShot(1, [=]() { w->payZcashURI(uri); });
+        });
 
         // For MacOS, we have an event filter
         a.installEventFilter(w);
@@ -226,7 +226,7 @@ public:
         // Check if starting headless
         Settings::getInstance()->setHeadless(false);
         w->show();
-        
+
         return QApplication::exec();
     }
 
@@ -248,17 +248,17 @@ public:
     bool handleSignal(int signal)
     {
         std::cout << std::endl << "Interrupted with signal " << signal << std::endl;
-        
-        if (w && w->getRPC()) {            
+
+        if (w && w->getRPC()) {
             // Blocking call to closeEvent on the UI thread.
-            DispatchToMainThread([=] { 
-                w->doClose(); 
+            DispatchToMainThread([=] {
+                w->doClose();
                 QApplication::quit();
             });
         } else {
             QApplication::quit();
         }
-        
+
         return true;
     }
 
@@ -271,4 +271,3 @@ int main(int argc, char* argv[])
     Application app;
     return app.main(argc, argv);
 }
-

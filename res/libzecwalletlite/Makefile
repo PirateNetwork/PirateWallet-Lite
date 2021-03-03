@@ -13,10 +13,11 @@ all: release
 winrelease: target/x86_64-pc-windows-gnu/release/zecwalletlite.lib
 
 target/x86_64-pc-windows-gnu/release/zecwalletlite.lib: src/lib.rs Cargo.toml
-	SODIUM_LIB_DIR="$(PWD)/libsodium-mingw/" cargo build --lib --release --target x86_64-pc-windows-gnu
+	#SODIUM_LIB_DIR="$(PWD)/libsodium-mingw/"
+	cargo build --lib --release --target x86_64-pc-windows-gnu
 
 release: target/release/zecwalletlite.$(EXT)
-debug: target/debug/zecwalletlite.$(EXT) 
+debug: target/debug/zecwalletlite.$(EXT)
 
 target/release/zecwalletlite.$(EXT): src/lib.rs Cargo.toml
 	LIBS="" CFLAGS=$(CFLAGS) cargo build --lib --release

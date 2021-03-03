@@ -75,15 +75,15 @@ export PATH=$PATH:/usr/local/bin
 #Clean
 echo -n "Cleaning..............."
 make distclean >/dev/null 2>&1
-rm -f artifacts/macOS-zecwallet-v$APP_VERSION.dmg 
-rm -rf Zecwallet-Lite.app/ zecwallet-lite.app/
+rm -f artifacts/macOS-zerwallet-v$APP_VERSION.dmg 
+rm -rf Zerwallet-Lite.app/ zerwallet-lite.app/
 echo "[OK]"
 
 
 echo -n "Configuring............"
 # Build
 QT_STATIC=$QT_PATH src/scripts/dotranslations.sh >/dev/null
-$QT_PATH/bin/qmake zecwallet-lite.pro CONFIG+=release >/dev/null
+$QT_PATH/bin/qmake zerwallet-lite.pro CONFIG+=release >/dev/null
 echo "[OK]"
 
 
@@ -94,26 +94,26 @@ echo "[OK]"
 #Qt deploy
 echo -n "Deploying.............."
 mkdir artifacts >/dev/null 2>&1
-rm -f artifcats/zecwallet-lite.dmg >/dev/null 2>&1
+rm -f artifcats/zerwallet-lite.dmg >/dev/null 2>&1
 rm -f artifacts/rw* >/dev/null 2>&1
-mv zecwallet-lite.app Zecwallet-Lite.app
-$QT_PATH/bin/macdeployqt Zecwallet-Lite.app 
-codesign --deep --force --verify --verbose -s "$CERTIFICATE" --options runtime --timestamp Zecwallet-Lite.app
+mv zerwallet-lite.app Zerwallet-Lite.app
+$QT_PATH/bin/macdeployqt Zerwallet-Lite.app 
+codesign --deep --force --verify --verbose -s "$CERTIFICATE" --options runtime --timestamp Zerwallet-Lite.app
 echo "[OK]"
 
 
 # Code Signing Note:
 # On MacOS, you still need to run these 3 commands:
-# xcrun altool --notarize-app -t osx -f macOS-zecwallet-lite-v1.0.0.dmg --primary-bundle-id="com.yourcompany.zecwallet-lite" -u "apple developer id@email.com" -p "one time password" 
+# xcrun altool --notarize-app -t osx -f macOS-zerwallet-lite-v1.0.0.dmg --primary-bundle-id="com.yourcompany.zerwallet-lite" -u "apple developer id@email.com" -p "one time password" 
 # xcrun altool --notarization-info <output from pervious command> -u "apple developer id@email.com" -p "one time password" 
 #...wait for the notarization to finish...
-# xcrun stapler staple macOS-zecwallet-lite-v1.0.0.dmg
+# xcrun stapler staple macOS-zerwallet-lite-v1.0.0.dmg
 
 echo -n "Building dmg..........."
 
-create-dmg --volname "Zecwallet-Lite-v$APP_VERSION" --volicon "res/logo.icns" --window-pos 200 120 --icon "Zecwallet-Lite.app" 200 190  --icon-size 100 --app-drop-link 600 185 --hide-extension "Zecwallet-Lite.app"  --window-size 800 400 --hdiutil-quiet --background res/dmgbg.png  artifacts/macOS-zecwallet-lite-v$APP_VERSION.dmg Zecwallet-Lite.app >/dev/null 2>&1
+create-dmg --volname "Zerwallet-Lite-v$APP_VERSION" --volicon "res/logo.icns" --window-pos 200 120 --icon "Zerwallet-Lite.app" 200 190  --icon-size 100 --app-drop-link 600 185 --hide-extension "Zerwallet-Lite.app"  --window-size 800 400 --hdiutil-quiet --background res/dmgbg.png  artifacts/macOS-zerwallet-lite-v$APP_VERSION.dmg Zerwallet-Lite.app >/dev/null 2>&1
 
-if [ ! -f artifacts/macOS-zecwallet-lite-v$APP_VERSION.dmg ]; then
+if [ ! -f artifacts/macOS-zerwallet-lite-v$APP_VERSION.dmg ]; then
     echo "[ERROR]"
     exit 1
 fi
@@ -121,5 +121,5 @@ echo  "[OK]"
 
 # Submit to Apple for notarization
 echo -n "Apple notarization....."
-xcrun altool --notarize-app -t osx -f artifacts/macOS-zecwallet-lite-v$APP_VERSION.dmg --primary-bundle-id="com.yourcompany.zecwallet-lite" -u "$APPLE_USERNAME" -p "$APPLE_PASSWORD" 
+xcrun altool --notarize-app -t osx -f artifacts/macOS-zerwallet-lite-v$APP_VERSION.dmg --primary-bundle-id="com.yourcompany.zerwallet-lite" -u "$APPLE_USERNAME" -p "$APPLE_PASSWORD" 
 echo  "[OK]"

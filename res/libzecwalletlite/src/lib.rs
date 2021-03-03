@@ -9,7 +9,23 @@ use std::cell::RefCell;
 
 use zecwalletlitelib::{commands, lightclient::{LightClient, LightClientConfig}};
 
-// We'll use a MUTEX to store a global lightclient instance, 
+
+
+
+pub fn set_address_params(mut config: LightClientConfig) -> LightClientConfig {
+
+    LightClientConfig::set_coin_type(&mut config, 323);
+    LightClientConfig::set_hrp_sapling_extended_spending_key(&mut config, "secret-extended-key-main".to_string());
+    LightClientConfig::set_hrp_sapling_extended_full_viewing_key(&mut config, "zviews".to_string());
+    LightClientConfig::set_hrp_sapling_payment_address(&mut config, "zs".to_string());
+    LightClientConfig::set_b58_pubkey_address_prefix(&mut config, [0x1c, 0xb8]);
+    LightClientConfig::set_b58_script_address_prefix(&mut config, [0x1c, 0xbd]);
+
+    config
+}
+
+
+// We'll use a MUTEX to store a global lightclient instance,
 // so we don't have to keep creating it. We need to store it here, in rust
 // because we can't return such a complex structure back to C++
 lazy_static! {
@@ -33,7 +49,7 @@ pub extern fn litelib_wallet_exists(chain_name: *const c_char) -> bool {
 
 /// Create a new wallet and return the seed for the newly created wallet.
 #[no_mangle]
-pub extern fn litelib_initialize_new(dangerous: bool, server: *const c_char) -> *mut c_char {
+pub extern fn litelib_initialize_new(server: *const c_char) -> *mut c_char {
     let server_str = unsafe {
         assert!(!server.is_null());
 
@@ -41,13 +57,16 @@ pub extern fn litelib_initialize_new(dangerous: bool, server: *const c_char) -> 
     };
 
     let server = LightClientConfig::get_server_or_default(Some(server_str));
-    let (config, latest_block_height) = match LightClientConfig::create(server, dangerous) {
+    let (mut config, latest_block_height) = match LightClientConfig::create(server) {
         Ok((c, h)) => (c, h),
         Err(e) => {
             let e_str = CString::new(format!("Error: {}", e)).unwrap();
             return e_str.into_raw();
         }
     };
+
+    //Set Encoding Specifications
+    config = set_address_params(config);
 
     let lightclient = match LightClient::new(&config, latest_block_height) {
         Ok(l) => l,
@@ -77,8 +96,10 @@ pub extern fn litelib_initialize_new(dangerous: bool, server: *const c_char) -> 
 
 /// Restore a wallet from the seed phrase
 #[no_mangle]
-pub extern fn litelib_initialize_new_from_phrase(dangerous: bool, server: *const c_char, 
+pub extern fn litelib_initialize_new_from_phrase(server: *const c_char,
             seed: *const c_char, birthday: u64) -> *mut c_char {
+
+    println!("Wallet Initialize: {}", "New from seed phrase");
     let server_str = unsafe {
         assert!(!server.is_null());
 
@@ -92,7 +113,7 @@ pub extern fn litelib_initialize_new_from_phrase(dangerous: bool, server: *const
     };
 
     let server = LightClientConfig::get_server_or_default(Some(server_str));
-    let (config, _latest_block_height) = match LightClientConfig::create(server, dangerous) {
+    let (mut config, _latest_block_height) = match LightClientConfig::create(server) {
         Ok((c, h)) => (c, h),
         Err(e) => {
             let e_str = CString::new(format!("Error: {}", e)).unwrap();
@@ -100,7 +121,10 @@ pub extern fn litelib_initialize_new_from_phrase(dangerous: bool, server: *const
         }
     };
 
-    let lightclient = match LightClient::new_from_phrase(seed_str, &config, birthday) {
+    //Set Encoding Specifications
+    config = set_address_params(config);
+
+    let lightclient = match LightClient::new_from_phrase(seed_str, &config, birthday, false) {
         Ok(l) => l,
         Err(e) => {
             let e_str = CString::new(format!("Error: {}", e)).unwrap();
@@ -112,14 +136,14 @@ pub extern fn litelib_initialize_new_from_phrase(dangerous: bool, server: *const
     let _ = lightclient.init_logging();
 
     LIGHTCLIENT.lock().unwrap().replace(Some(Arc::new(lightclient)));
- 
+
     let c_str = CString::new("OK").unwrap();
     return c_str.into_raw();
 }
 
 // Initialize a new lightclient and store its value
 #[no_mangle]
-pub extern fn litelib_initialize_existing(dangerous: bool, server: *const c_char) -> *mut c_char {
+pub extern fn litelib_initialize_existing(server: *const c_char) -> *mut c_char {
     let server_str = unsafe {
         assert!(!server.is_null());
 
@@ -127,13 +151,16 @@ pub extern fn litelib_initialize_existing(dangerous: bool, server: *const c_char
     };
 
     let server = LightClientConfig::get_server_or_default(Some(server_str));
-    let (config, _latest_block_height) = match LightClientConfig::create(server, dangerous) {
+    let (mut config, _latest_block_height) = match LightClientConfig::create(server) {
         Ok((c, h)) => (c, h),
         Err(e) => {
             let e_str = CString::new(format!("Error: {}", e)).unwrap();
             return e_str.into_raw();
         }
     };
+
+    //Set Encoding Specifications
+    config = set_address_params(config);
 
     let lightclient = match LightClient::read_from_disk(&config) {
         Ok(l) => l,
@@ -190,9 +217,9 @@ pub extern fn litelib_execute(cmd: *const c_char, args: *const c_char) -> *mut c
 }
 
 /**
- * Callers that receive string return values from other functions should call this to return the string 
+ * Callers that receive string return values from other functions should call this to return the string
  * back to rust, so it can be freed. Failure to call this function will result in a memory leak
- */ 
+ */
 #[no_mangle]
 pub extern fn litelib_rust_free_string(s: *mut c_char) {
     unsafe {

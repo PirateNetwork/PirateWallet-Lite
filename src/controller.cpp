@@ -11,7 +11,7 @@ using json = nlohmann::json;
 Controller::Controller(MainWindow* main) {
     auto cl = new ConnectionLoader(main, this);
 
-    // Execute the load connection async, so we can set up the rest of RPC properly. 
+    // Execute the load connection async, so we can set up the rest of RPC properly.
     QTimer::singleShot(1, [=]() { cl->loadConnection(); });
 
     this->main = main;
@@ -24,7 +24,7 @@ Controller::Controller(MainWindow* main) {
     // Setup transactions table model
     transactionsTableModel = new TxTableModel(ui->transactionsTable);
     main->ui->transactionsTable->setModel(transactionsTableModel);
-    
+
     // Set up timer to refresh Price
     priceTimer = new QTimer(main);
     QObject::connect(priceTimer, &QTimer::timeout, [=]() {
@@ -36,14 +36,16 @@ Controller::Controller(MainWindow* main) {
     // Set up a timer to refresh the UI every few seconds
     timer = new QTimer(main);
     QObject::connect(timer, &QTimer::timeout, [=]() {
-        refresh();
+        refresh(true);
+        // Update the Send Tab
+        main->updateFromCombo();
     });
-    timer->start(Settings::updateSpeed);    
+    timer->start(Settings::updateSpeed);
 
     // Create the data model
     model = new DataModel();
 
-    // Crate the ZcashdRPC 
+    // Crate the ZcashdRPC
     zrpc = new LiteInterface();
 }
 
@@ -59,7 +61,7 @@ Controller::~Controller() {
 }
 
 
-// Called when a connection to zcashd is available. 
+// Called when a connection to zcashd is available.
 void Controller::setConnection(Connection* c) {
     if (c == nullptr) return;
 
@@ -84,10 +86,13 @@ void Controller::setConnection(Connection* c) {
 
 
 // Build the RPC JSON Parameters for this tx
-void Controller::fillTxJsonParams(json& allRecepients, Tx tx) {   
-    Q_ASSERT(allRecepients.is_array());
+void Controller::fillTxJsonParams(json& json_tx, Tx tx) {
+    Q_ASSERT(json_tx.is_object());
 
-    // For each addr/amt/memo, construct the JSON and also build the confirm dialog box    
+    json_tx["input"]       = tx.fromAddr.toStdString();
+
+    json allRecepients = json::array();
+    // For each addr/amt/memo, construct the JSON and also build the confirm dialog box
     for (int i=0; i < tx.toAddrs.size(); i++) {
         auto toAddr = tx.toAddrs[i];
 
@@ -100,10 +105,14 @@ void Controller::fillTxJsonParams(json& allRecepients, Tx tx) {
 
         allRecepients.push_back(rec);
     }
+
+    json_tx["output"]       = allRecepients;
+    json_tx["fee"]          = tx.fee.toqint64();
+
 }
 
 
-void Controller::noConnection() {    
+void Controller::noConnection() {
     QIcon i = QApplication::style()->standardIcon(QStyle::SP_MessageBoxCritical);
     main->statusIcon->setPixmap(i.pixmap(16, 16));
     main->statusIcon->setToolTip("");
@@ -133,7 +142,7 @@ void Controller::noConnection() {
 
 /// This will refresh all the balance data from zcashd
 void Controller::refresh(bool force) {
-    if (!zrpc->haveConnection()) 
+    if (!zrpc->haveConnection())
         return noConnection();
 
     getInfoThenRefresh(force);
@@ -157,22 +166,48 @@ void Controller::processInfo(const json& info) {
 }
 
 void Controller::getInfoThenRefresh(bool force) {
-    if (!zrpc->haveConnection()) 
+    if (!zrpc->haveConnection())
         return noConnection();
 
     static bool prevCallSucceeded = false;
 
-    zrpc->fetchLatestBlock([=] (const json& reply) {   
-        prevCallSucceeded = true;       
+    zrpc->syncWallet([=] (const json& reply) {
+      QString syncStatus  = QString::fromStdString(reply["result"].get<json::string_t>());
+
+      main->logger->write(QString("Sync Wallet ") % syncStatus);
+
+    }, [=](QString err) {
+        // zcashd has probably disappeared.
+        this->noConnection();
+
+        // Prevent multiple dialog boxes, because these are called async
+        static bool shown = false;
+        if (!shown && prevCallSucceeded) { // show error only first time
+            shown = true;
+            QMessageBox::critical(main, QObject::tr("Connection Error"), QObject::tr("There was an error connecting to zcashd. The error was") + ": \n\n"
+                + err, QMessageBox::StandardButton::Ok);
+            shown = false;
+        }
+
+        prevCallSucceeded = false;
+    });
+
+
+
+    zrpc->fetchLatestBlock([=] (const json& reply) {
+        prevCallSucceeded = true;
 
         int curBlock  = reply["height"].get<json::number_integer_t>();
         bool doUpdate = force || (model->getLatestBlock() != curBlock);
+
+
+
         model->setLatestBlock(curBlock);
 
         main->logger->write(QString("Refresh. curblock ") % QString::number(curBlock) % ", update=" % (doUpdate ? "true" : "false") );
 
         // Connected, so display checkmark.
-        auto tooltip = Settings::getInstance()->getSettings().server + "\n" + 
+        auto tooltip = Settings::getInstance()->getSettings().server + "\n" +
                             QString::fromStdString(zrpc->getConnection()->getInfo().dump());
         QIcon i(":/icons/res/connected.gif");
         QString chainName = Settings::getInstance()->isTestnet() ? "test" : "main";
@@ -194,7 +229,7 @@ void Controller::getInfoThenRefresh(bool force) {
 
         if ( doUpdate ) {
             // Something changed, so refresh everything.
-            refreshBalances();        
+            refreshBalances();
             refreshAddresses();     // This calls refreshZSentTransactions() and refreshReceivedZTrans()
             refreshTransactions();
         }
@@ -216,15 +251,15 @@ void Controller::getInfoThenRefresh(bool force) {
 }
 
 void Controller::refreshAddresses() {
-    if (!zrpc->haveConnection()) 
+    if (!zrpc->haveConnection())
         return noConnection();
-    
+
     auto newzaddresses = new QList<QString>();
     auto newtaddresses = new QList<QString>();
 
     zrpc->fetchAddresses([=] (json reply) {
         auto zaddrs = reply["z_addresses"].get<json::array_t>();
-        for (auto& it : zaddrs) {   
+        for (auto& it : zaddrs) {
             auto addr = QString::fromStdString(it.get<json::string_t>());
             newzaddresses->push_back(addr);
         }
@@ -232,7 +267,7 @@ void Controller::refreshAddresses() {
         model->replaceZaddresses(newzaddresses);
 
         auto taddrs = reply["t_addresses"].get<json::array_t>();
-        for (auto& it : taddrs) {   
+        for (auto& it : taddrs) {
             auto addr = QString::fromStdString(it.get<json::string_t>());
             if (Settings::isTAddress(addr))
                 newtaddresses->push_back(addr);
@@ -243,20 +278,23 @@ void Controller::refreshAddresses() {
         // Refresh the sent and received txs from all these z-addresses
         refreshTransactions();
     });
-    
+
 }
 
 // Function to create the data model and update the views, used below.
-void Controller::updateUI(bool anyUnconfirmed) {    
+void Controller::updateUI(bool anyUnconfirmed) {
     ui->unconfirmedWarning->setVisible(anyUnconfirmed);
 
     // Update balances model data, which will update the table too
     balancesTableModel->setNewData(model->getAllZAddresses(), model->getAllTAddresses(), model->getAllBalances(), model->getUTXOs());
+
+    // Update from address
+    main->updateFromCombo();
 };
 
 // Function to process reply of the listunspent and z_listunspent API calls, used below.
 void Controller::processUnspent(const json& reply, QMap<QString, CAmount>* balancesMap, QList<UnspentOutput>* unspentOutputs) {
-    auto processFn = [=](const json& array) {        
+    auto processFn = [=](const json& array) {
         for (auto& it : array) {
             QString qsAddr  = QString::fromStdString(it["address"]);
             int block       = it["created_in_block"].get<json::number_unsigned_t>();
@@ -283,7 +321,7 @@ void Controller::processUnspent(const json& reply, QMap<QString, CAmount>* balan
 void Controller::updateUIBalances() {
     CAmount balT = getModel()->getBalT();
     CAmount balZ = getModel()->getBalZ();
-    CAmount balVerified = getModel()->getBalVerified();
+    // CAmount balVerified = getModel()->getBalVerified();
 
     // Reduce the BalanceZ by the pending outgoing amount. We're adding
     // here because totalPending is already negative for outgoing txns.
@@ -293,43 +331,43 @@ void Controller::updateUIBalances() {
     }
 
     CAmount balTotal     = balT + balZ;
-    CAmount balAvailable = balT + balVerified;
+    CAmount balAvailable = balT + balZ;
 
     // Balances table
     ui->balSheilded   ->setText(balZ.toDecimalZECString());
-    ui->balVerified   ->setText(balVerified.toDecimalZECString());
+    // ui->balVerified   ->setText(balVerified.toDecimalZECString());
     ui->balTransparent->setText(balT.toDecimalZECString());
     ui->balTotal      ->setText(balTotal.toDecimalZECString());
 
     ui->balSheilded   ->setToolTip(balZ.toDecimalUSDString());
-    ui->balVerified   ->setToolTip(balVerified.toDecimalUSDString());
+    // ui->balVerified   ->setToolTip(balVerified.toDecimalUSDString());
     ui->balTransparent->setToolTip(balT.toDecimalUSDString());
     ui->balTotal      ->setToolTip(balTotal.toDecimalUSDString());
 
     // Send tab
-    ui->txtAvailableZEC->setText(balAvailable.toDecimalZECString());
-    ui->txtAvailableUSD->setText(balAvailable.toDecimalUSDString());
+    // ui->txtAvailableZEC->setText(balAvailable.toDecimalZECString());
+     ui->balUSDTotal->setText(balAvailable.toDecimalUSDString());
 }
 
-void Controller::refreshBalances() {    
-    if (!zrpc->haveConnection()) 
+void Controller::refreshBalances() {
+    if (!zrpc->haveConnection())
         return noConnection();
 
     // 1. Get the Balances
-    zrpc->fetchBalance([=] (json reply) {    
+    zrpc->fetchBalance([=] (json reply) {
         CAmount balT        = CAmount::fromqint64(reply["tbalance"].get<json::number_unsigned_t>());
         CAmount balZ        = CAmount::fromqint64(reply["zbalance"].get<json::number_unsigned_t>());
-        CAmount balVerified = CAmount::fromqint64(reply["verified_zbalance"].get<json::number_unsigned_t>());
-        
+        // CAmount balVerified = CAmount::fromqint64(reply["verified_zbalance"].get<json::number_unsigned_t>());
+
         model->setBalT(balT);
         model->setBalZ(balZ);
-        model->setBalVerified(balVerified);
+        // model->setBalVerified(balVerified);
 
         // This is for the websockets
         AppDataModel::getInstance()->setBalances(balT, balZ);
-        
+
         // This is for the datamodel
-        CAmount balAvailable = balT + balVerified;
+        CAmount balAvailable = balT + balZ;
         model->setAvailableBalance(balAvailable);
 
         updateUIBalances();
@@ -349,9 +387,9 @@ void Controller::refreshBalances() {
         model->replaceUTXOs(newUnspentOutputs);
 
         // Find if any output is not spendable or is pending
-        bool anyUnconfirmed = std::find_if(newUnspentOutputs->constBegin(), newUnspentOutputs->constEnd(), 
-                                    [=](const UnspentOutput& u) -> bool { 
-                                        return !u.spendable ||  u.pending; 
+        bool anyUnconfirmed = std::find_if(newUnspentOutputs->constBegin(), newUnspentOutputs->constEnd(),
+                                    [=](const UnspentOutput& u) -> bool {
+                                        return !u.spendable ||  u.pending;
                               }) != newUnspentOutputs->constEnd();
 
         updateUI(anyUnconfirmed);
@@ -360,17 +398,14 @@ void Controller::refreshBalances() {
     });
 }
 
-void Controller::refreshTransactions() {    
-    if (!zrpc->haveConnection()) 
+void Controller::refreshTransactions() {
+    if (!zrpc->haveConnection())
         return noConnection();
 
     zrpc->fetchTransactions([=] (json reply) {
-        QList<TransactionItem> txdata;        
+        QList<TransactionItem> txdata;
 
-        for (auto& it : reply.get<json::array_t>()) {  
-            QString address;
-            CAmount total_amount;
-            QList<TransactionItemDetail> items;
+        for (auto& it : reply.get<json::array_t>()) {
 
             long confirmations;
             if (it.find("unconfirmed") != it.end() && it["unconfirmed"].get<json::boolean_t>()) {
@@ -378,66 +413,102 @@ void Controller::refreshTransactions() {
             } else {
                 confirmations = model->getLatestBlock() - it["block_height"].get<json::number_integer_t>() + 1;
             }
-            
+
             auto txid = QString::fromStdString(it["txid"]);
             auto datetime = it["datetime"].get<json::number_integer_t>();
 
-            // First, check if there's outgoing metadata
-            if (!it["outgoing_metadata"].is_null()) {
-            
-                for (auto o: it["outgoing_metadata"].get<json::array_t>()) {
+            if (!it["incoming_metadata"].is_null()) {
+
+                for (auto o: it["incoming_metadata"].get<json::array_t>()) {
+                    QList<TransactionItemDetail> items;
                     QString address = QString::fromStdString(o["address"]);
-                    
-                    // Sent items are -ve
-                    CAmount amount = CAmount::fromqint64(-1 * o["value"].get<json::number_unsigned_t>()); 
-                    
+                    CAmount amount = CAmount::fromqint64(1 * o["value"].get<json::number_unsigned_t>());
                     QString memo;
                     if (!o["memo"].is_null()) {
                         memo = QString::fromStdString(o["memo"]);
                     }
 
                     items.push_back(TransactionItemDetail{address, amount, memo});
-                    total_amount = total_amount + amount;
+                    txdata.push_back(TransactionItem{
+                       "Receive", datetime, address, txid, confirmations, items
+                    });
                 }
-
-                {
-                    // Concat all the addresses
-                    QList<QString> addresses;
-                    for (auto item : items) {
-                        addresses.push_back(item.address);
-                    }
-                    address = addresses.join(",");
-                }
-
-                txdata.push_back(TransactionItem{
-                   "Sent", datetime, address, txid,confirmations, items
-                });
-            } else {
-                // Incoming Transaction
-                address = (it["address"].is_null() ? "" : QString::fromStdString(it["address"]));
-                model->markAddressUsed(address);
-
-                QString memo;
-                if (!it["memo"].is_null()) {
-                    memo = QString::fromStdString(it["memo"]);
-                }
-
-                items.push_back(TransactionItemDetail{
-                    address,
-                    CAmount::fromqint64(it["amount"].get<json::number_integer_t>()),
-                    memo
-                });
-
-                TransactionItem tx{
-                    "Receive", datetime, address, txid,confirmations, items
-                };
-
-                txdata.push_back(tx);
             }
-            
+
+            if (Settings::getInstance()->getShowTxFee()) {
+              QList<TransactionItemDetail> items;
+              QString address = QString::fromStdString("Tx Fee");
+              CAmount amount = CAmount::fromqint64(-1 * it["fee"].get<json::number_unsigned_t>());
+              QString memo;
+
+              items.push_back(TransactionItemDetail{address, amount, memo});
+
+              if (it["fee"].get<json::number_unsigned_t>() > 0) {
+                txdata.push_back(TransactionItem{
+                   "Fee", datetime, address, txid, confirmations, items
+                });
+              }
+            }
+
+            if (!it["outgoing_metadata"].is_null()) {
+
+                for (auto o: it["outgoing_metadata"].get<json::array_t>()) {
+                    QList<TransactionItemDetail> items;
+                    QString address = QString::fromStdString(o["address"]);
+                    CAmount amount = CAmount::fromqint64(-1 * o["value"].get<json::number_unsigned_t>());
+                    QString memo;
+                    if (!o["memo"].is_null()) {
+                        memo = QString::fromStdString(o["memo"]);
+                    }
+
+                    items.push_back(TransactionItemDetail{address, amount, memo});
+                    txdata.push_back(TransactionItem{
+                       "Sent", datetime, address, txid, confirmations, items
+                    });
+                }
+            }
+
+
+            if ((it["outgoing_metadata"].is_null() && it["incoming_metadata"].is_null()) || Settings::getInstance()->getShowChangeTxns()) {
+                if (!it["incoming_metadata_change"].is_null()) {
+                    for (auto o: it["incoming_metadata_change"].get<json::array_t>()) {
+                        QList<TransactionItemDetail> items;
+                        QString address = QString::fromStdString(o["address"]);
+                        CAmount amount = CAmount::fromqint64(-1 * o["value"].get<json::number_unsigned_t>());
+                        QString memo;
+                        if (!o["memo"].is_null()) {
+                            memo = QString::fromStdString(o["memo"]);
+                        }
+
+                        items.push_back(TransactionItemDetail{address, amount, memo});
+                        txdata.push_back(TransactionItem{
+                           "Change Received", datetime, address, txid, confirmations, items
+                        });
+                    }
+                }
+                if (!it["outgoing_metadata_change"].is_null()) {
+                    for (auto o: it["outgoing_metadata_change"].get<json::array_t>()) {
+                        QList<TransactionItemDetail> items;
+                        QString address = QString::fromStdString(o["address"]);
+                        CAmount amount = CAmount::fromqint64(-1 * o["value"].get<json::number_unsigned_t>());
+                        QString memo;
+                        if (!o["memo"].is_null()) {
+                            memo = QString::fromStdString(o["memo"]);
+                        }
+
+                        items.push_back(TransactionItemDetail{address, amount, memo});
+                        txdata.push_back(TransactionItem{
+                           "Change Sent", datetime, address, txid, confirmations, items
+                        });
+                    }
+                }
+            }
+
+
+
         }
 
-        // Calculate the total unspent amount that's pending. This will need to be 
+        // Calculate the total unspent amount that's pending. This will need to be
         // shown in the UI so the user can keep track of pending funds
         CAmount totalPending;
         for (auto txitem : txdata) {
@@ -453,16 +524,16 @@ void Controller::refreshTransactions() {
         updateUIBalances();
 
         // Update model data, which updates the table view
-        transactionsTableModel->replaceData(txdata);        
+        transactionsTableModel->replaceData(txdata);
     });
 }
 
-// If the wallet is encrpyted and locked, we need to unlock it 
+// If the wallet is encrpyted and locked, we need to unlock it
 void Controller::unlockIfEncrypted(std::function<void(void)> cb, std::function<void(void)> error) {
     auto encStatus = getModel()->getEncryptionStatus();
     if (encStatus.first && encStatus.second) {
         // Wallet is encrypted and locked. Ask for the password and unlock.
-        QString password = QInputDialog::getText(main, main->tr("Wallet Password"), 
+        QString password = QInputDialog::getText(main, main->tr("Wallet Password"),
                             main->tr("Your wallet is encrypted.\nPlease enter your wallet password"), QLineEdit::Password);
 
         if (password.isEmpty()) {
@@ -500,28 +571,29 @@ void Controller::unlockIfEncrypted(std::function<void(void)> cb, std::function<v
  */
 void Controller::executeStandardUITransaction(Tx tx) {
     executeTransaction(tx,
-        [=] (QString txid) { 
+        [=] (QString txid) {
             ui->statusBar->showMessage(Settings::txidStatusMessage + " " + txid);
         },
         [=] (QString opid, QString errStr) {
             ui->statusBar->showMessage(QObject::tr(" Tx ") % opid % QObject::tr(" failed"), 15 * 1000);
 
             if (!opid.isEmpty())
-                errStr = QObject::tr("The transaction with id ") % opid % QObject::tr(" failed. The error was") + ":\n\n" + errStr; 
+                errStr = QObject::tr("The transaction with id ") % opid % QObject::tr(" failed. The error was") + ":\n\n" + errStr;
 
-            QMessageBox::critical(main, QObject::tr("Transaction Error"), errStr, QMessageBox::Ok);            
+            QMessageBox::critical(main, QObject::tr("Transaction Error"), errStr, QMessageBox::Ok);
         }
     );
 }
 
 
 // Execute a transaction!
-void Controller::executeTransaction(Tx tx, 
+void Controller::executeTransaction(Tx tx,
         const std::function<void(QString txid)> submitted,
         const std::function<void(QString txid, QString errStr)> error) {
     unlockIfEncrypted([=] () {
         // First, create the json params
-        json params = json::array();
+        json params = json::object();
+        //json params = json::array();
         fillTxJsonParams(params, tx);
         std::cout << std::setw(2) << params << std::endl;
 
@@ -543,14 +615,14 @@ void Controller::executeTransaction(Tx tx,
 
 
 void Controller::checkForUpdate(bool silent) {
-    if (!zrpc->haveConnection()) 
+    if (!zrpc->haveConnection())
         return noConnection();
 
-    QUrl cmcURL("https://api.github.com/repos/adityapk00/zecwallet-lite/releases");
+    QUrl cmcURL("https://api.github.com/repos/zerocurrencycoin/zerwallet-lite/releases");
 
     QNetworkRequest req;
     req.setUrl(cmcURL);
-    
+
     QNetworkAccessManager *manager = new QNetworkAccessManager(this->main);
     QNetworkReply *reply = manager->get(req);
 
@@ -580,7 +652,7 @@ void Controller::checkForUpdate(bool silent) {
                 }
 
                 auto currentVersion = QVersionNumber::fromString(APP_VERSION);
-                
+
                 // Get the max version that the user has hidden updates for
                 QSettings s;
                 auto maxHiddenVersion = QVersionNumber::fromString(s.value("update/lastversion", "0.0.0").toString());
@@ -588,43 +660,43 @@ void Controller::checkForUpdate(bool silent) {
                 qDebug() << "Version check: Current " << currentVersion << ", Available " << maxVersion;
 
                 if (maxVersion > currentVersion && (!silent || maxVersion > maxHiddenVersion)) {
-                    auto ans = QMessageBox::information(main, QObject::tr("Update Available"), 
+                    auto ans = QMessageBox::information(main, QObject::tr("Update Available"),
                         QObject::tr("A new release v%1 is available! You have v%2.\n\nWould you like to visit the releases page?")
                             .arg(maxVersion.toString())
                             .arg(currentVersion.toString()),
                         QMessageBox::Yes, QMessageBox::Cancel);
                     if (ans == QMessageBox::Yes) {
-                        QDesktopServices::openUrl(QUrl("https://github.com/adityapk00/zecwallet-lite/releases"));
+                        QDesktopServices::openUrl(QUrl("https://github.com/zerocurrencycoin/zerowallet-lite/releases"));
                     } else {
                         // If the user selects cancel, don't bother them again for this version
                         s.setValue("update/lastversion", maxVersion.toString());
                     }
                 } else {
                     if (!silent) {
-                        QMessageBox::information(main, QObject::tr("No updates available"), 
+                        QMessageBox::information(main, QObject::tr("No updates available"),
                             QObject::tr("You already have the latest release v%1")
                                 .arg(currentVersion.toString()));
                     }
-                } 
+                }
             }
         }
         catch (...) {
             // If anything at all goes wrong, just set the price to 0 and move on.
-            qDebug() << QString("Caught something nasty");
-        }       
+            qDebug() << QString("Caught something nasty - check for update");
+        }
     });
 }
 
-// Get the ZEC->USD price from coinmarketcap using their API
 void Controller::refreshZECPrice() {
-    if (!zrpc->haveConnection()) 
+// Get the ZER->USD price from coinmarketcap using their API
+    if (!zrpc->haveConnection())
         return noConnection();
 
-    QUrl cmcURL("https://api.coinmarketcap.com/v1/ticker/");
+    QUrl cmcURL("https://api.coingecko.com/api/v3/simple/price?ids=zero&vs_currencies=usd");
 
     QNetworkRequest req;
     req.setUrl(cmcURL);
-    
+
     QNetworkAccessManager *manager = new QNetworkAccessManager(this->main);
     QNetworkReply *reply = manager->get(req);
 
@@ -636,34 +708,31 @@ void Controller::refreshZECPrice() {
             if (reply->error() != QNetworkReply::NoError) {
                 auto parsed = json::parse(reply->readAll(), nullptr, false);
                 if (!parsed.is_discarded() && !parsed["error"]["message"].is_null()) {
-                    qDebug() << QString::fromStdString(parsed["error"]["message"]);    
+                    qDebug() << QString::fromStdString(parsed["error"]["message"]);
                 } else {
                     qDebug() << reply->errorString();
                 }
                 Settings::getInstance()->setZECPrice(0);
                 return;
-            } 
+            }
 
             auto all = reply->readAll();
-            
+
             auto parsed = json::parse(all, nullptr, false);
             if (parsed.is_discarded()) {
                 Settings::getInstance()->setZECPrice(0);
                 return;
             }
 
-            for (const json& item : parsed.get<json::array_t>()) {
-                if (item["symbol"].get<json::string_t>() == Settings::getTokenName().toStdString()) {
-                    QString price = QString::fromStdString(item["price_usd"].get<json::string_t>());
-                    qDebug() << Settings::getTokenName() << " Price=" << price;
-                    Settings::getInstance()->setZECPrice(price.toDouble());
+            auto price = parsed["zero"]["usd"].get<json::number_float_t>();
+            qDebug() << Settings::getTokenName() << " Price=" << price;
+            Settings::getInstance()->setZECPrice(price);
 
-                    return;
-                }
-            }
+            return;
+
         } catch (...) {
             // If anything at all goes wrong, just set the price to 0 and move on.
-            qDebug() << QString("Caught something nasty");
+            qDebug() << QString("Caught something nasty - refresh Zero Price");
         }
 
         // If nothing, then set the price to 0;
@@ -677,13 +746,13 @@ void Controller::shutdownZcashd() {
         QDialog d(main);
         Ui_ConnectionDialog connD;
         connD.setupUi(&d);
-        connD.topIcon->setBasePixmap(QIcon(":/icons/res/icon.ico").pixmap(256, 256));
-        connD.status->setText(QObject::tr("Please wait for ZecWallet to exit"));
+        connD.topIcon->setPixmap(QIcon(":/icons/res/icon.ico").pixmap(128, 128));
+        connD.status->setText(QObject::tr("Please wait for ZerWallet to exit"));
         connD.statusDetail->setText(QObject::tr("Waiting for zcashd to exit"));
 
         bool finished = false;
 
-        zrpc->saveWallet([&] (json) {        
+        zrpc->saveWallet([&] (json) {
             if (!finished)
                 d.accept();
             finished = true;
@@ -694,9 +763,9 @@ void Controller::shutdownZcashd() {
     }
 }
 
-/** 
+/**
  * Get a Sapling address from the user's wallet
- */ 
+ */
 QString Controller::getDefaultSaplingAddress() {
     for (QString addr: model->getAllZAddresses()) {
         if (Settings::getInstance()->isSaplingAddress(addr))
@@ -709,6 +778,6 @@ QString Controller::getDefaultSaplingAddress() {
 QString Controller::getDefaultTAddress() {
     if (model->getAllTAddresses().length() > 0)
         return model->getAllTAddresses().at(0);
-    else 
+    else
         return QString();
 }

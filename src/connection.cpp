@@ -7,7 +7,7 @@
 #include "controller.h"
 
 
-#include "../lib/zecwalletlitelib.h"
+#include "../res/libzecwalletlite/zecwalletlitelib.h"
 
 #include "precompiled.h"
 
@@ -21,7 +21,7 @@ ConnectionLoader::ConnectionLoader(MainWindow* main, Controller* rpc) {
     connD = new Ui_ConnectionDialog();
     connD->setupUi(d);
     QPixmap logo(":/img/res/logobig.gif");
-    connD->topIcon->setBasePixmap(logo.scaled(256, 256, Qt::KeepAspectRatio, Qt::SmoothTransformation));
+    connD->topIcon->setPixmap(logo.scaled(128, 128, Qt::KeepAspectRatio, Qt::SmoothTransformation));
 
     isSyncing = new QAtomicInteger<bool>();
 }
@@ -51,7 +51,7 @@ void ConnectionLoader::doAutoConnect() {
     // Check to see if there's an existing wallet
     if (litelib_wallet_exists(Settings::getDefaultChainName().toStdString().c_str())) {
         main->logger->write(QObject::tr("Using existing wallet."));
-        char* resp = litelib_initialize_existing(config->dangerous, config->server.toStdString().c_str());
+        char* resp = litelib_initialize_existing(config->server.toStdString().c_str());
         QString response = litelib_process_response(resp);
 
         if (response.toUpper().trimmed() != "OK") {
@@ -62,8 +62,8 @@ void ConnectionLoader::doAutoConnect() {
         main->logger->write(QObject::tr("Create/restore wallet."));
         createOrRestore(config->dangerous, config->server);
         d->show();
-    }    
-    
+    }
+
     auto connection = makeConnection(config);
     auto me = this;
 
@@ -87,7 +87,7 @@ void ConnectionLoader::doAutoConnect() {
             // When sync is done, set the connection
             this->doRPCSetConnection(connection);
         });
-        
+
         // While it is syncing, we'll show the status updates while it is alive.
         QObject::connect(syncTimer, &QTimer::timeout, [=]() {
             // Check the sync status
@@ -104,8 +104,8 @@ void ConnectionLoader::doAutoConnect() {
                     qDebug() << "Sync error" << err;
                 });
             }
-        });   
-        
+        });
+
         syncTimer->setInterval(1* 1000);
         syncTimer->start();
 
@@ -119,7 +119,7 @@ void ConnectionLoader::createOrRestore(bool dangerous, QString server) {
     d->hide();
 
     // Create a wizard
-    FirstTimeWizard wizard(dangerous, server);    
+    FirstTimeWizard wizard(dangerous, server);
 
     wizard.exec();
 }
@@ -127,7 +127,7 @@ void ConnectionLoader::createOrRestore(bool dangerous, QString server) {
 void ConnectionLoader::doRPCSetConnection(Connection* conn) {
     qDebug() << "Connectionloader finished, setting connection";
     rpc->setConnection(conn);
-    
+
     d->accept();
 
     QTimer::singleShot(1, [=]() { delete this; });
@@ -144,9 +144,9 @@ void ConnectionLoader::showInformation(QString info, QString detail) {
 }
 
 /**
- * Show error will close the loading dialog and show an error. 
+ * Show error will close the loading dialog and show an error.
 */
-void ConnectionLoader::showError(QString explanation) {    
+void ConnectionLoader::showError(QString explanation) {
     rpc->noConnection();
 
     QMessageBox::critical(main, QObject::tr("Connection Error"), explanation, QMessageBox::Ok);
@@ -167,7 +167,7 @@ QString litelib_process_response(char* resp) {
 
 /***********************************************************************************
  *  Connection, Executor and Callback Class
- ************************************************************************************/ 
+ ************************************************************************************/
 void Executor::run() {
     char* resp = litelib_execute(this->cmd.toStdString().c_str(), this->args.toStdString().c_str());
 
@@ -205,7 +205,7 @@ Connection::Connection(MainWindow* m, std::shared_ptr<ConnectionConfig> conf) {
     qRegisterMetaType<json>("json");
 }
 
-void Connection::doRPC(const QString cmd, const QString args, const std::function<void(json)>& cb, 
+void Connection::doRPC(const QString cmd, const QString args, const std::function<void(json)>& cb,
                        const std::function<void(QString)>& errCb) {
     if (shutdownInProgress) {
         // Ignoring RPC because shutdown in progress
@@ -223,7 +223,7 @@ void Connection::doRPC(const QString cmd, const QString args, const std::functio
     QObject::connect(runner, &Executor::responseReady, c, &Callback::processRPCCallback);
     QObject::connect(runner, &Executor::handleError, c, &Callback::processError);
 
-    QThreadPool::globalInstance()->start(runner);    
+    QThreadPool::globalInstance()->start(runner);
 }
 
 void Connection::doRPCWithDefaultErrorHandling(const QString cmd, const QString args, const std::function<void(json)>& cb) {
@@ -254,7 +254,7 @@ void Connection::showTxError(const QString& error) {
 
 /**
  * Prevent all future calls from going through
- */ 
+ */
 void Connection::shutdown() {
     shutdownInProgress = true;
 }

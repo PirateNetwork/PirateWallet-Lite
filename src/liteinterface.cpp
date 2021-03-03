@@ -12,7 +12,7 @@ void LiteInterface::setConnection(Connection* c) {
     if (conn) {
         delete conn;
     }
-    
+
     conn = c;
 }
 
@@ -121,7 +121,7 @@ void LiteInterface::removeWalletEncryption(QString password, const std::function
 }
 
 
-void LiteInterface::sendTransaction(QString params, const std::function<void(json)>& cb, 
+void LiteInterface::sendTransaction(QString params, const std::function<void(json)>& cb,
     const std::function<void(QString)>& err) {
     if (conn == nullptr)
         return;
@@ -129,7 +129,7 @@ void LiteInterface::sendTransaction(QString params, const std::function<void(jso
     conn->doRPC("send", params, cb, err);
 }
 
-void LiteInterface::fetchInfo(const std::function<void(json)>& cb, 
+void LiteInterface::fetchInfo(const std::function<void(json)>& cb,
     const std::function<void(QString)>&  err) {
     if (conn == nullptr)
         return;
@@ -138,19 +138,27 @@ void LiteInterface::fetchInfo(const std::function<void(json)>& cb,
 }
 
 
-void LiteInterface::fetchLatestBlock(const std::function<void(json)>& cb, 
+void LiteInterface::fetchLatestBlock(const std::function<void(json)>& cb,
                         const std::function<void(QString)>& err) {
     if (conn == nullptr)
         return;
 
-    conn->doRPC("height", "", cb, err);       
+    conn->doRPC("height", "", cb, err);
+}
+
+void LiteInterface::syncWallet(const std::function<void(json)>& cb,
+                        const std::function<void(QString)>& err) {
+    if (conn == nullptr)
+        return;
+
+    conn->doRPC("sync", "", cb, err);
 }
 
 /**
  * Method to get all the private keys for both z and t addresses. It will make 2 batch calls,
  * combine the result, and call the callback with a single list containing both the t-addr and z-addr
  * private keys
- */ 
+ */
 void LiteInterface::fetchAllPrivKeys(const std::function<void(json)> cb) {
     if (conn == nullptr) {
         // No connection, just return
@@ -159,4 +167,3 @@ void LiteInterface::fetchAllPrivKeys(const std::function<void(json)> cb) {
 
     conn->doRPCWithDefaultErrorHandling("export", "", cb);
 }
-

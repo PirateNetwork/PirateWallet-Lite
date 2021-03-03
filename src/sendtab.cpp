@@ -12,7 +12,7 @@ using json = nlohmann::json;
 
 void MainWindow::setupSendTab() {
     // Create the validator for send to/amount fields
-    amtValidator = new QRegExpValidator(QRegExp("[0-9]{0,8}\\.?[0-9]{0,8}"));    
+    amtValidator = new QRegExpValidator(QRegExp("[0-9]{0,8}\\.?[0-9]{0,8}"));
 
     ui->Amount1->setValidator(amtValidator);
 
@@ -21,6 +21,10 @@ void MainWindow::setupSendTab() {
 
     // Cancel Button
     QObject::connect(ui->cancelSendButton, &QPushButton::clicked, this, &MainWindow::cancelButton);
+
+    // Input Combobox current text changed
+    QObject::connect(ui->inputsCombo, QOverload<int>::of(&QComboBox::currentIndexChanged),
+        this, &MainWindow::inputComboTextChanged);
 
     // Hook up add address button click
     QObject::connect(ui->addAddressButton, &QPushButton::clicked, this, &MainWindow::addAddressSection);
@@ -38,10 +42,10 @@ void MainWindow::setupSendTab() {
         this->memoButtonClicked(1);
     });
     setMemoEnabled(1, false);
-        
+
     // This is the damnest thing ever. If we do AddressBook::readFromStorage() directly, the whole file
     // doesn't get read. It needs to run in a timer after everything has finished to be able to read
-    // the file properly. 
+    // the file properly.
     QTimer::singleShot(2000, [=]() { updateLabelsAutoComplete(); });
 
     // The first address book button
@@ -55,12 +59,12 @@ void MainWindow::setupSendTab() {
     });
 
     // Fee amount changed
-    ui->minerFeeAmt->setReadOnly(true);
+    ui->minerFeeAmt->setReadOnly(false);
     QObject::connect(ui->minerFeeAmt, &QLineEdit::textChanged, [=](auto txt) {
         CAmount fee = CAmount::fromDecimalString(txt);
         ui->lblMinerFeeUSD->setText(fee.toDecimalUSDString());
     });
-    ui->minerFeeAmt->setText(Settings::getMinerFee().toDecimalString());    
+    ui->minerFeeAmt->setText(Settings::getMinerFee().toDecimalString());
 
      // Set up focus enter to set fees
     QObject::connect(ui->tabWidget, &QTabWidget::currentChanged, [=] (int pos) {
@@ -70,9 +74,9 @@ void MainWindow::setupSendTab() {
             ui->lblMinerFeeUSD->setText(feeUSD);
         }
     });
-    
+
     //Fees validator
-    feesValidator = new QRegExpValidator(QRegExp("[0-9]{0,8}\\.?[0-9]{0,8}")); 
+    feesValidator = new QRegExpValidator(QRegExp("[0-9]{0,8}\\.?[0-9]{0,8}"));
     ui->minerFeeAmt->setValidator(feesValidator);
 
     // Font for the first Memo label
@@ -83,7 +87,7 @@ void MainWindow::setupSendTab() {
     // Recurring button
     QObject::connect(ui->chkRecurring, &QCheckBox::stateChanged, [=] (int checked) {
         if (checked) {
-            ui->btnRecurSchedule->setEnabled(true);   
+            ui->btnRecurSchedule->setEnabled(true);
 
             // If this is the first time the button is checked, open the edit schedule dialog
             if (sendTxRecurringInfo == nullptr) {
@@ -115,23 +119,23 @@ void MainWindow::disableRecurring() {
 void MainWindow::editSchedule() {
     // Only on testnet for now
     if (!Settings::getInstance()->isTestnet()) {
-        QMessageBox::critical(this, "Not Supported yet", 
+        QMessageBox::critical(this, "Not Supported yet",
             "Recurring payments are only supported on Testnet for now.", QMessageBox::Ok);
         return;
     }
 
     // Check to see that recurring payments are not selected when there are 2 or more addresses
     if (ui->sendToWidgets->children().size()-1 > 2) {
-        QMessageBox::critical(this, tr("Cannot support multiple addresses"), 
+        QMessageBox::critical(this, tr("Cannot support multiple addresses"),
             tr("Recurring payments doesn't currently support multiple addresses"), QMessageBox::Ok);
         return;
     }
 
     // Open the edit schedule dialog
-    auto recurringInfo = Recurring::getInstance()->getNewRecurringFromTx(this, this, 
+    auto recurringInfo = Recurring::getInstance()->getNewRecurringFromTx(this, this,
                             createTxFromSendPage(), this->sendTxRecurringInfo);
     if (recurringInfo == nullptr) {
-        // User pressed cancel. 
+        // User pressed cancel.
         // If there is no existing recurring info, uncheck the recurring box
         if (sendTxRecurringInfo == nullptr) {
             ui->chkRecurring->setCheckState(Qt::Unchecked);
@@ -148,11 +152,12 @@ void MainWindow::editSchedule() {
 void MainWindow::updateLabelsAutoComplete() {
     QList<QString> list;
     auto labels = AddressBook::getInstance()->getAllAddressLabels();
-    
+
     std::transform(labels.begin(), labels.end(), std::back_inserter(list), [=] (auto la) -> QString {
-        return la.first % "/" % la.second;
+        // return la.first % "/" % la.second;
+        return la.second;
     });
-    
+
     delete labelCompleter;
     labelCompleter = new QCompleter(list, this);
     labelCompleter->setCaseSensitivity(Qt::CaseInsensitive);
@@ -164,7 +169,51 @@ void MainWindow::updateLabelsAutoComplete() {
     }
 }
 
-    
+void MainWindow::inputComboTextChanged(int index) {
+  auto model = this->getRPC()->getModel();
+  auto addr   = ui->inputsCombo->itemText(index);
+  auto bal    = model->getAllBalances().value(addr);
+
+  ui->sendAddressBalance->setText(bal.toDecimalZECString());
+  ui->sendAddressBalanceUSD->setText(bal.toDecimalUSDString());
+
+  if (ui->Max1->checkState()){
+    maxAmountChecked(Qt::Checked);
+  }
+}
+
+void MainWindow::updateFromCombo() {
+    auto model = this->getRPC()->getModel();
+    //auto model = this->rpc->getModel();
+
+    if (!model)
+       return;
+
+    auto lastFromAddr = ui->inputsCombo->currentText();
+
+    ui->inputsCombo->clear();
+    auto i = model->getAllBalances().constBegin();
+
+    // Add all the addresses into the inputs combo box
+    while (i != model->getAllBalances().constEnd()) {
+        ui->inputsCombo->addItem(i.key(), i.value());
+        if (i.key() == lastFromAddr || lastFromAddr.isEmpty()) {
+          ui->inputsCombo->setCurrentText(i.key());
+          ui->sendAddressBalance->setText(i.value().toDecimalZECString());
+          ui->sendAddressBalanceUSD->setText(i.value().toDecimalUSDString());
+          lastFromAddr = ui->inputsCombo->currentText();
+        }
+        ++i;
+    }
+
+//    if (lastFromAddr.isEmpty()) {
+//        //setDefaultPayFrom();
+//    }
+//    else {
+//        ui->inputsCombo->setCurrentText(lastFromAddr);
+//    }
+}
+
 void MainWindow::addAddressSection() {
     int itemNumber = ui->sendToWidgets->children().size() - 1;
 
@@ -182,7 +231,7 @@ void MainWindow::addAddressSection() {
     horizontalLayout_12->addWidget(label_4);
 
     auto Address1 = new QLineEdit(verticalGroupBox);
-    Address1->setObjectName(QString("Address") % QString::number(itemNumber)); 
+    Address1->setObjectName(QString("Address") % QString::number(itemNumber));
     Address1->setPlaceholderText(tr("Address"));
     QObject::connect(Address1, &QLineEdit::textChanged, [=] (auto text) {
         this->addressChanged(itemNumber, text);
@@ -204,16 +253,16 @@ void MainWindow::addAddressSection() {
 
     auto horizontalLayout_13 = new QHBoxLayout();
     horizontalLayout_13->setSpacing(6);
-        
+
     auto label_6 = new QLabel(verticalGroupBox);
     label_6->setText(tr("Amount"));
     horizontalLayout_13->addWidget(label_6);
 
     auto Amount1 = new QLineEdit(verticalGroupBox);
-    Amount1->setPlaceholderText(tr("Amount"));    
-    Amount1->setObjectName(QString("Amount") % QString::number(itemNumber));   
+    Amount1->setPlaceholderText(tr("Amount"));
+    Amount1->setObjectName(QString("Amount") % QString::number(itemNumber));
     Amount1->setBaseSize(QSize(200, 0));
-    Amount1->setAlignment(Qt::AlignRight);    
+    Amount1->setAlignment(Qt::AlignRight);
 
     // Create the validator for send to/amount fields
     Amount1->setValidator(amtValidator);
@@ -224,7 +273,7 @@ void MainWindow::addAddressSection() {
     horizontalLayout_13->addWidget(Amount1);
 
     auto AmtUSD1 = new QLabel(verticalGroupBox);
-    AmtUSD1->setObjectName(QString("AmtUSD") % QString::number(itemNumber));   
+    AmtUSD1->setObjectName(QString("AmtUSD") % QString::number(itemNumber));
     horizontalLayout_13->addWidget(AmtUSD1);
 
     auto horizontalSpacer_4 = new QSpacerItem(40, 20, QSizePolicy::Expanding, QSizePolicy::Minimum);
@@ -232,7 +281,7 @@ void MainWindow::addAddressSection() {
 
     auto MemoBtn1 = new QPushButton(verticalGroupBox);
     MemoBtn1->setObjectName(QString("MemoBtn") % QString::number(itemNumber));
-    MemoBtn1->setText(tr("Memo"));    
+    MemoBtn1->setText(tr("Memo"));
     // Connect Memo Clicked button
     QObject::connect(MemoBtn1, &QPushButton::clicked, [=] () {
         this->memoButtonClicked(itemNumber);
@@ -250,24 +299,24 @@ void MainWindow::addAddressSection() {
     MemoTxt1->setWordWrap(true);
     sendAddressLayout->addWidget(MemoTxt1);
 
-    ui->sendToLayout->insertWidget(itemNumber-1, verticalGroupBox);         
+    ui->sendToLayout->insertWidget(itemNumber-1, verticalGroupBox);
 
     // Disable recurring payments if a address section is added, since recurring payments
     // aren't supported for more than 1 address
     delete sendTxRecurringInfo;
     sendTxRecurringInfo = nullptr;
     ui->lblRecurDesc->setText("");
-    ui->chkRecurring->setChecked(false);    
+    ui->chkRecurring->setChecked(false);
     ui->chkRecurring->setEnabled(false);
 
     // Set focus into the address
     Address1->setFocus();
 
     // Delay the call to scroll to allow the scroll window to adjust
-    QTimer::singleShot(10, [=] () {ui->sendToScrollArea->ensureWidgetVisible(ui->addAddressButton);});                
+    QTimer::singleShot(10, [=] () {ui->sendToScrollArea->ensureWidgetVisible(ui->addAddressButton);});
 }
 
-void MainWindow::addressChanged(int itemNumber, const QString& text) {   
+void MainWindow::addressChanged(int itemNumber, const QString& text) {
     auto addr = AddressBook::addressFromAddressLabel(text);
     setMemoEnabled(itemNumber, Settings::isZAddress(addr));
 }
@@ -348,7 +397,7 @@ void MainWindow::memoButtonClicked(int number, bool includeReplyTo) {
 
 void MainWindow::clearSendForm() {
     // The last one is a spacer, so ignore that
-    int totalItems = ui->sendToWidgets->children().size() - 2; 
+    int totalItems = ui->sendToWidgets->children().size() - 2;
 
     // Clear the first recipient fields
     auto addr = ui->sendToWidgets->findChild<QLineEdit*>(QString("Address1"));
@@ -371,14 +420,14 @@ void MainWindow::clearSendForm() {
     // Start the deletion after the first item, since we want to keep 1 send field there all there
     for (int i=1; i < totalItems; i++) {
         auto addressGroupBox = ui->sendToWidgets->findChild<QGroupBox*>(QString("AddressGroupBox") % QString::number(i+1));
-            
+
         delete addressGroupBox;
-    }    
+    }
 
     // Reset the recurring button
     if (Settings::getInstance()->isTestnet()) {
-        ui->chkRecurring->setEnabled(true);        
-    } 
+        ui->chkRecurring->setEnabled(true);
+    }
 
     ui->chkRecurring->setCheckState(Qt::Unchecked);
     ui->btnRecurSchedule->setEnabled(false);
@@ -390,24 +439,17 @@ void MainWindow::clearSendForm() {
 void MainWindow::maxAmountChecked(int checked) {
     if (checked == Qt::Checked) {
         ui->Amount1->setReadOnly(true);
-        if (rpc == nullptr) return;
-           
-        // Calculate maximum amount
-        CAmount sumAllAmounts;
-        // Calculate all other amounts
-        int totalItems = ui->sendToWidgets->children().size() - 2;   // The last one is a spacer, so ignore that        
-        // Start counting the sum skipping the first one, because the MAX button is on the first one, and we don't
-        // want to include it in the sum. 
-        for (int i=1; i < totalItems; i++) {
-            auto amt  = ui->sendToWidgets->findChild<QLineEdit*>(QString("Amount")  % QString::number(i+1));
-            sumAllAmounts = sumAllAmounts + CAmount::fromDecimalString(amt->text());
-        }
 
-        sumAllAmounts = sumAllAmounts + Settings::getMinerFee();
-        
-        auto maxamount  = rpc->getModel()->getAvailableBalance() - sumAllAmounts;
-        maxamount       = (maxamount < 0) ? CAmount::fromqint64(0): maxamount;
-            
+        QString sendBalanceStr = ui->sendAddressBalance->text().trimmed();
+        sendBalanceStr.replace(Settings::getTokenName(),"").replace(" ","");
+
+        CAmount maxamount = CAmount::fromDecimalString("0.00");
+        CAmount sendBalance = CAmount::fromDecimalString(sendBalanceStr);
+        CAmount fee = CAmount::fromDecimalString(ui->minerFeeAmt->text().trimmed());
+
+        if (sendBalance > fee) {
+          maxamount = sendBalance - fee;
+        }
         ui->Amount1->setText(maxamount.toDecimalString());
     } else if (checked == Qt::Unchecked) {
         // Just remove the readonly part, don't change the content
@@ -415,26 +457,26 @@ void MainWindow::maxAmountChecked(int checked) {
     }
 }
 
-// Create a Tx from the current state of the send page. 
+// Create a Tx from the current state of the send page.
 Tx MainWindow::createTxFromSendPage() {
     Tx tx;
 
     // For each addr/amt in the sendTo tab
-    int totalItems = ui->sendToWidgets->children().size() - 2;   // The last one is a spacer, so ignore that        
+    int totalItems = ui->sendToWidgets->children().size() - 2;   // The last one is a spacer, so ignore that
     CAmount totalAmt;
     for (int i=0; i < totalItems; i++) {
         QString addr = ui->sendToWidgets->findChild<QLineEdit*>(QString("Address") % QString::number(i+1))->text().trimmed();
         // Remove label if it exists
         addr = AddressBook::addressFromAddressLabel(addr);
-        
+
         QString amtStr = ui->sendToWidgets->findChild<QLineEdit*>(QString("Amount")  % QString::number(i+1))->text().trimmed();
         if (amtStr.isEmpty()) {
             amtStr = "-1";; // The user didn't specify an amount
-        }        
+        }
 
         bool ok;
         CAmount amt;
-        
+
         // Make sure it parses
         amtStr.toDouble(&ok);
         if (!ok) {
@@ -443,21 +485,22 @@ Tx MainWindow::createTxFromSendPage() {
             amt = CAmount::fromDecimalString(amtStr);
             totalAmt = totalAmt + amt;
         }
-        
+
         QString memo = ui->sendToWidgets->findChild<QLabel*>(QString("MemoTxt")  % QString::number(i+1))->text().trimmed();
-        
+
         tx.toAddrs.push_back( ToFields{addr, amt, memo} );
     }
 
-    tx.fee = Settings::getMinerFee();
-    
+    tx.fromAddr = ui->inputsCombo->currentText();
+    tx.fee = CAmount::fromDecimalString(ui->minerFeeAmt->text().trimmed());
+
     return tx;
 }
 
 bool MainWindow::confirmTx(Tx tx, RecurringPaymentInfo* rpi) {
 
-    // Function to split the address to make it easier to read. 
-    // Split it into chunks of 4 chars. 
+    // Function to split the address to make it easier to read.
+    // Split it into chunks of 4 chars.
     auto fnSplitAddressForWrap = [=] (const QString& a) -> QString {
         if (Settings::isTAddress(a))
             return a;
@@ -489,6 +532,8 @@ bool MainWindow::confirmTx(Tx tx, RecurringPaymentInfo* rpi) {
     confirm.setupUi(&d);
     Settings::saveRestore(&d);
 
+    const QFont fixedFont = QFontDatabase::systemFont(QFontDatabase::FixedFont);
+
     // Remove all existing address/amt qlabels on the confirm dialog.
     int totalConfirmAddrItems = confirm.sendToAddrs->children().size();
     for (int i = 0; i < totalConfirmAddrItems / 3; i++) {
@@ -509,8 +554,8 @@ bool MainWindow::confirmTx(Tx tx, RecurringPaymentInfo* rpi) {
     delete confirm.sendToAddrs->findChild<QLabel*>("labelMinerFee");
     delete confirm.sendToAddrs->findChild<QLabel*>("minerFee");
     delete confirm.sendToAddrs->findChild<QLabel*>("minerFeeUSD");
-    
-    // For each addr/amt/memo, construct the JSON and also build the confirm dialog box    
+
+    // For each addr/amt/memo, construct the JSON and also build the confirm dialog box
     int row = 0;
     CAmount totalSpending;
 
@@ -524,9 +569,10 @@ bool MainWindow::confirmTx(Tx tx, RecurringPaymentInfo* rpi) {
             Addr->setObjectName(QString("Addr") % QString::number(i + 1));
             Addr->setWordWrap(true);
             Addr->setText(fnSplitAddressForWrap(toAddr.addr));
+            Addr->setFont(fixedFont);
             confirm.gridLayout->addWidget(Addr, row, 0, 1, 1);
 
-            // Amount (ZEC)
+            // Amount (ZER)
             auto Amt = new QLabel(confirm.sendToAddrs);
             Amt->setObjectName(QString("Amt") % QString::number(i + 1));
             Amt->setText(toAddr.amount.toDecimalZECString());
@@ -539,7 +585,7 @@ bool MainWindow::confirmTx(Tx tx, RecurringPaymentInfo* rpi) {
             AmtUSD->setObjectName(QString("AmtUSD") % QString::number(i + 1));
             AmtUSD->setText(toAddr.amount.toDecimalUSDString());
             AmtUSD->setAlignment(Qt::AlignRight | Qt::AlignTrailing | Qt::AlignVCenter);
-            confirm.gridLayout->addWidget(AmtUSD, row, 2, 1, 1);            
+            confirm.gridLayout->addWidget(AmtUSD, row, 2, 1, 1);
 
             // Memo
             if (Settings::isZAddress(toAddr.addr) && !toAddr.memo.isEmpty()) {
@@ -600,11 +646,16 @@ bool MainWindow::confirmTx(Tx tx, RecurringPaymentInfo* rpi) {
         confirm.lblRecurringDesc->setText(rpi->getScheduleDescription());
     }
 
+    confirm.sendFrom->setText(fnSplitAddressForWrap(tx.fromAddr));
+    confirm.sendFrom->setFont(fixedFont);
+    confirm.sendAmt->setText(totalSpending.toDecimalZECString());
+    confirm.sendUSD->setText(totalSpending.toDecimalUSDString());
+
     // Syncing warning
     confirm.syncingWarning->setVisible(Settings::getInstance()->isSyncing());
 
     // Show the dialog and submit it if the user confirms
-    return d.exec() == QDialog::Accepted;        
+    return d.exec() == QDialog::Accepted;
 }
 
 // Send button clicked
@@ -627,9 +678,9 @@ void MainWindow::sendButton() {
     }
 
     // Show a dialog to confirm the Tx
-    if (confirmTx(tx, sendTxRecurringInfo)) {        
-        // If this is a recurring payment, save the hash so we can 
-        // update the payment if it submits. 
+    if (confirmTx(tx, sendTxRecurringInfo)) {
+        // If this is a recurring payment, save the hash so we can
+        // update the payment if it submits.
         QString recurringPaymentHash;
 
         // Recurring payments are enabled only if there is exactly 1 destination address.
@@ -647,7 +698,7 @@ void MainWindow::sendButton() {
         auto connD = new Ui_ConnectionDialog();
         connD->setupUi(d);
         QPixmap logo(":/img/res/logobig.gif");
-        connD->topIcon->setBasePixmap(logo.scaled(256, 256, Qt::KeepAspectRatio, Qt::SmoothTransformation));
+        connD->topIcon->setPixmap(logo.scaled(128, 128, Qt::KeepAspectRatio, Qt::SmoothTransformation));
 
         connD->status->setText(tr("Please wait..."));
         connD->statusDetail->setText(tr("Computing your transaction"));
@@ -655,8 +706,8 @@ void MainWindow::sendButton() {
         d->show();
 
         // And send the Tx
-        rpc->executeTransaction(tx, 
-            [=] (QString txid) { 
+        rpc->executeTransaction(tx,
+            [=] (QString txid) {
                 ui->statusBar->showMessage(Settings::txidStatusMessage + " " + txid);
 
                 connD->status->setText(tr("Done!"));
@@ -671,40 +722,40 @@ void MainWindow::sendButton() {
                     // And switch to the balances tab
                     ui->tabWidget->setCurrentIndex(0);
                 });
-                
+
                 // Force a UI update so we get the unconfirmed Tx
                 rpc->refresh(true);
 
                 // If this was a recurring payment, update the payment with the info
                 if (!recurringPaymentHash.isEmpty()) {
                     // Since this is the send button payment, this is the first payment
-                    Recurring::getInstance()->updatePaymentItem(recurringPaymentHash, 0, 
+                    Recurring::getInstance()->updatePaymentItem(recurringPaymentHash, 0,
                             txid, "", PaymentStatus::COMPLETED);
                 }
             },
             // Errored out
             [=] (QString opid, QString errStr) {
                 ui->statusBar->showMessage(QObject::tr(" Tx ") % opid % QObject::tr(" failed"), 15 * 1000);
-                
+
                 d->accept();
                 d->close();
                 delete connD;
                 delete d;
 
                 if (!opid.isEmpty())
-                    errStr = QObject::tr("The transaction with id ") % opid % QObject::tr(" failed. The error was") + ":\n\n" + errStr; 
+                    errStr = QObject::tr("The transaction with id ") % opid % QObject::tr(" failed. The error was") + ":\n\n" + errStr;
 
                 // If this was a recurring payment, update the payment with the failure
                 if (!recurringPaymentHash.isEmpty()) {
                     // Since this is the send button payment, this is the first payment
-                    Recurring::getInstance()->updatePaymentItem(recurringPaymentHash, 0, 
-                            "", errStr, PaymentStatus::ERROR); 
-                }                   
+                    Recurring::getInstance()->updatePaymentItem(recurringPaymentHash, 0,
+                            "", errStr, PaymentStatus::ERROR);
+                }
 
-                QMessageBox::critical(this, QObject::tr("Transaction Error"), errStr, QMessageBox::Ok);            
+                QMessageBox::critical(this, QObject::tr("Transaction Error"), errStr, QMessageBox::Ok);
             }
         );
-    }        
+    }
 }
 
 QString MainWindow::doSendTxValidations(Tx tx) {
@@ -718,7 +769,7 @@ QString MainWindow::doSendTxValidations(Tx tx) {
         }
 
         // This technically shouldn't be possible, but issue #62 seems to have discovered a bug
-        // somewhere, so just add a check to make sure. 
+        // somewhere, so just add a check to make sure.
         if (toAddr.amount.toqint64() < 0) {
             return QString(tr("Amount for address '%1' is invalid!").arg(toAddr.addr));
         }
@@ -740,4 +791,3 @@ QString MainWindow::doSendTxValidations(Tx tx) {
 void MainWindow::cancelButton() {
     clearSendForm();
 }
-

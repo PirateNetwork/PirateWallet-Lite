@@ -9,22 +9,24 @@
         <file>res/icon.ico</file>
     </qresource>
     <qresource prefix="/img">
-        <file>res/zcashdlogo.gif</file>
+        <file>res/zerodlogo.gif</file>
         <file>res/logobig.gif</file>
     </qresource>
     <qresource prefix="/translations">
-        <file>res/zec_qt_wallet_es.qm</file>
-        <file>res/zec_qt_wallet_fr.qm</file>
-        <file>res/zec_qt_wallet_pt.qm</file>
-        <file>res/zec_qt_wallet_it.qm</file>
-        <file>res/zec_qt_wallet_zh.qm</file>
-        <file>res/zec_qt_wallet_tr.qm</file>
+        <file>res/zer_qt_wallet_es.qm</file>
+        <file>res/zer_qt_wallet_fr.qm</file>
+        <file>res/zer_qt_wallet_pt.qm</file>
+        <file>res/zer_qt_wallet_it.qm</file>
+        <file>res/zer_qt_wallet_zh.qm</file>
+        <file>res/zer_qt_wallet_tr.qm</file>
     </qresource>
     <qresource prefix="/css">
         <file>res/css/blue.css</file>
         <file>res/css/dark.css</file>
         <file>res/css/default.css</file>
         <file>res/css/light.css</file>
+        <file>res/css/matrix.css</file>
+        <file>res/css/zero.css</file>
     </qresource>
     <qresource prefix="/images/blue">
         <file>res/images/blue/unchecked.png</file>
@@ -35,5 +37,9 @@
         <file>res/images/blue/blue_leftArrow_small.png</file>
         <file>res/images/blue/blue_rightArrow_small.png</file>
         <file>res/images/blue/blue_qtreeview_selected.png</file>
+    </qresource>
+    <qresource prefix="backgrounds">
+        <file>res/images/backgrounds/matrix.jpg</file>
+        <file>res/images/backgrounds/zero.jpg</file>
     </qresource>
 </RCC>

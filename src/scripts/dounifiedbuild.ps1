@@ -11,11 +11,11 @@ param (
 
 
 Write-Host "[Initializing]"
-Remove-Item -Force -ErrorAction Ignore ./artifacts/linux-binaries-zecwallet-lite-v$version.tar.gz
-Remove-Item -Force -ErrorAction Ignore ./artifacts/linux-deb-zecwallet-lite-v$version.deb
-Remove-Item -Force -ErrorAction Ignore ./artifacts/Windows-binaries-lite-zecwallet-v$version.zip
-Remove-Item -Force -ErrorAction Ignore ./artifacts/Windows-installer-lite-zecwallet-v$version.msi
-Remove-Item -Force -ErrorAction Ignore ./artifacts/macOS-zecwallet--litev$version.dmg
+Remove-Item -Force -ErrorAction Ignore ./artifacts/linux-binaries-zerwallet-lite-v$version.tar.gz
+Remove-Item -Force -ErrorAction Ignore ./artifacts/linux-deb-zerwallet-lite-v$version.deb
+Remove-Item -Force -ErrorAction Ignore ./artifacts/Windows-binaries-lite-zerwallet-v$version.zip
+Remove-Item -Force -ErrorAction Ignore ./artifacts/Windows-installer-lite-zerwallet-v$version.msi
+Remove-Item -Force -ErrorAction Ignore ./artifacts/macOS-zerwallet--litev$version.dmg
 Remove-Item -Force -ErrorAction Ignore ./artifacts/signatures-v$version.tar.gz
 
 
@@ -45,7 +45,7 @@ Write-Host -NoNewline "Copying files.........."
 rm -rf lib/target/
 ssh $server "rm -rf /tmp/zqwbuild"
 ssh $server "mkdir /tmp/zqwbuild"
-scp -r src/ singleapplication/ res/ lib/ ./zecwallet-lite.pro ./application.qrc ./LICENSE ./README.md ${server}:/tmp/zqwbuild/ | Out-Null
+scp -r src/ singleapplication/ res/ lib/ ./zerwallet-lite.pro ./application.qrc ./LICENSE ./README.md ${server}:/tmp/zqwbuild/ | Out-Null
 ssh $server "dos2unix -q /tmp/zqwbuild/src/scripts/mkrelease.sh" | Out-Null
 ssh $server "dos2unix -q /tmp/zqwbuild/src/version.h"
 Write-Host "[OK]"
@@ -92,11 +92,11 @@ Write-Host "[OK]"
 
 # Finally, test to make sure all files exist
 Write-Host -NoNewline "Checking Build........."
-if (! (Test-Path ./artifacts/linux-binaries-zecwallet-lite-v$version.tar.gz) -or
-    ! (Test-Path ./artifacts/linux-deb-zecwallet-lite-v$version.deb) -or
-    ! (Test-Path ./artifacts/Windows-binaries-zecwallet-lite-v$version.zip) -or
-    ! (Test-Path ./artifacts/macOS-zecwallet-lite-v$version.dmg) -or 
-    ! (Test-Path ./artifacts/Windows-installer-zecwallet-lite-v$version.msi) ) {
+if (! (Test-Path ./artifacts/linux-binaries-zerwallet-lite-v$version.tar.gz) -or
+    ! (Test-Path ./artifacts/linux-deb-zerwallet-lite-v$version.deb) -or
+    ! (Test-Path ./artifacts/Windows-binaries-zerwallet-lite-v$version.zip) -or
+    ! (Test-Path ./artifacts/macOS-zerwallet-lite-v$version.dmg) -or 
+    ! (Test-Path ./artifacts/Windows-installer-zerwallet-lite-v$version.msi) ) {
         Write-Host "[Error]"
         exit 1;
     }

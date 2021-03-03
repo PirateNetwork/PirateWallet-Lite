@@ -24,7 +24,7 @@ void AddressBookModel::saveData() {
 }
 
 
-void AddressBookModel::loadData() {        
+void AddressBookModel::loadData() {
     labels = AddressBook::getInstance()->getAllAddressLabels();
 
     parent->horizontalHeader()->restoreState(QSettings().value("addresstablegeometry").toByteArray());
@@ -46,7 +46,7 @@ void AddressBookModel::removeItemAt(int row) {
         return;
 
     AddressBook::getInstance()->removeAddressLabel(labels[row].first, labels[row].second);
-    
+
     labels.clear();
     labels = AddressBook::getInstance()->getAllAddressLabels();
 
@@ -78,7 +78,7 @@ QVariant AddressBookModel::data(const QModelIndex &index, int role) const {
         }
     }
     return QVariant();
-}  
+}
 
 
 QVariant AddressBookModel::headerData(int section, Qt::Orientation orientation, int role) const {
@@ -108,7 +108,7 @@ void AddressBook::open(MainWindow* parent, QLineEdit* target) {
     // If there is no target, the we'll call the button "Ok", else "Pick"
     if (target != nullptr) {
         ab.buttonBox->button(QDialogButtonBox::Ok)->setText(QObject::tr("Pick"));
-    } 
+    }
 
     // Connect the dialog's closing to updating the label address completor
     QObject::connect(&d, &QDialog::finished, [=] (auto) { parent->updateLabels(); });
@@ -125,35 +125,35 @@ void AddressBook::open(MainWindow* parent, QLineEdit* target) {
         QString newLabel = ab.label->text();
 
         if (addr.isEmpty() || newLabel.isEmpty()) {
-            QMessageBox::critical(parent, QObject::tr("Address or Label Error"), 
+            QMessageBox::critical(parent, QObject::tr("Address or Label Error"),
                 QObject::tr("Address or Label cannot be empty"), QMessageBox::Ok);
             return;
         }
         // Test if address is valid.
         if (!Settings::isValidAddress(addr)) {
-            QMessageBox::critical(parent, QObject::tr("Address Format Error"), 
+            QMessageBox::critical(parent, QObject::tr("Address Format Error"),
                 QObject::tr("%1 doesn't seem to be a valid Zcash address.")
-                    .arg(addr), 
+                    .arg(addr),
                 QMessageBox::Ok);
             return;
-        } 
+        }
 
-        // Don't allow duplicate address labels.                 
+        // Don't allow duplicate address labels.
         if (!getInstance()->getAddressForLabel(newLabel).isEmpty()) {
-            QMessageBox::critical(parent, QObject::tr("Label Error"), 
+            QMessageBox::critical(parent, QObject::tr("Label Error"),
                 QObject::tr("The label '%1' already exists. Please remove the existing label.")
-                    .arg(newLabel), 
+                    .arg(newLabel),
                 QMessageBox::Ok);
             return;
-        } 
-    
+        }
+
         model.addNewLabel(newLabel, ab.addr->text());
     });
 
     // Import Button
     QObject::connect(ab.btnImport, &QPushButton::clicked, [&] () {
         // Get the import file name.
-        auto fileName = QFileDialog::getOpenFileUrl(&d, QObject::tr("Import Address Book"), QUrl(), 
+        auto fileName = QFileDialog::getOpenFileUrl(&d, QObject::tr("Import Address Book"), QUrl(),
             "CSV file (*.csv)");
         if (fileName.isEmpty())
             return;
@@ -162,7 +162,7 @@ void AddressBook::open(MainWindow* parent, QLineEdit* target) {
         if (!file.open(QIODevice::ReadOnly)) {
             QMessageBox::information(&d, QObject::tr("Unable to open file"), file.errorString());
             return;
-        }        
+        }
 
         QTextStream in(&file);
         QString line;
@@ -185,7 +185,8 @@ void AddressBook::open(MainWindow* parent, QLineEdit* target) {
     });
 
     auto fnSetTargetLabelAddr = [=] (QLineEdit* target, QString label, QString addr) {
-        target->setText(label % "/" % addr);
+        //target->setText(label % "/" % addr);
+        target->setText(addr);
     };
 
     // Double-Click picks the item
@@ -222,7 +223,7 @@ void AddressBook::open(MainWindow* parent, QLineEdit* target) {
         }
 
         menu.addAction(QObject::tr("Copy address"), [&] () {
-            QGuiApplication::clipboard()->setText(addr);            
+            QGuiApplication::clipboard()->setText(addr);
             parent->ui->statusBar->showMessage(QObject::tr("Copied to clipboard"), 3 * 1000);
         });
 
@@ -230,7 +231,7 @@ void AddressBook::open(MainWindow* parent, QLineEdit* target) {
             model.removeItemAt(index.row());
         });
 
-        menu.exec(ab.addresses->viewport()->mapToGlobal(pos));    
+        menu.exec(ab.addresses->viewport()->mapToGlobal(pos));
     });
 
     if (d.exec() == QDialog::Accepted && target != nullptr) {
@@ -267,18 +268,18 @@ void AddressBook::readFromStorage() {
         file.open(QIODevice::ReadOnly);
         QDataStream in(&file);    // read the data serialized from the file
         QString version;
-        in >> version >> allLabels; 
+        in >> version >> allLabels;
 
         file.close();
     }
 
-    // Special. 
-    // Add the default ZecWallet donation address if it isn't already present
+    // Special.
+    // Add the default ZerWallet donation address if it isn't already present
     // QList<QString> allAddresses;
-    // std::transform(allLabels.begin(), allLabels.end(), 
+    // std::transform(allLabels.begin(), allLabels.end(),
     //     std::back_inserter(allAddresses), [=] (auto i) { return i.second; });
     // if (!allAddresses.contains(Settings::getDonationAddr(true))) {
-    //     allLabels.append(QPair<QString, QString>("ZecWallet donation", Settings::getDonationAddr(true)));
+    //     allLabels.append(QPair<QString, QString>("ZerWallet donation", Settings::getDonationAddr(true)));
     // }
 }
 
@@ -380,8 +381,8 @@ QString AddressBook::addLabelToAddress(QString addr) {
         return addr;
 }
 
-QString AddressBook::addressFromAddressLabel(const QString& lblAddr) { 
-    return lblAddr.trimmed().split("/").last(); 
+QString AddressBook::addressFromAddressLabel(const QString& lblAddr) {
+    return lblAddr.trimmed().split("/").last();
 }
 
 AddressBook* AddressBook::instance = nullptr;

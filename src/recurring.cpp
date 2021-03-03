@@ -143,7 +143,7 @@ RecurringPaymentInfo* Recurring::getNewRecurringFromTx(QWidget* parent, MainWind
         ui.txtMemo->setEnabled(false);
     }
 
-    // Wire up ZEC/USD toggle
+    // Wire up ZER/USD toggle
     QObject::connect(ui.cmbCurrency, &QComboBox::currentTextChanged, [&](QString c) {
         if (tx.toAddrs.length() < 1)
             return;
@@ -461,21 +461,21 @@ void Recurring::processMultiplePending(RecurringPaymentInfo rpi, MainWindow* mai
 }
 
 void Recurring::executeRecurringPayment(MainWindow* main, RecurringPaymentInfo rpi, QList<int> paymentNumbers) {
-    // Amount is in USD or ZEC?
+    // Amount is in USD or ZER?
     double amount = rpi.amt;
     if (rpi.currency == "USD") {
         // If there is no price, then fail the payment
         if (Settings::getInstance()->getZECPrice() == 0) {
             for (auto paymentNumber: paymentNumbers) {
                 updatePaymentItem(rpi.getHash(), paymentNumber, 
-                    "", QObject::tr("No ZEC price was available to convert from USD"),
+                    "", QObject::tr("No ZER price was available to convert from USD"),
                     PaymentStatus::ERROR);
             }
             return;
         }
         
-        // Translate it into ZEC
         amount = rpi.amt / Settings::getInstance()->getZECPrice();
+        // Translate it into ZER
     }
 
     // Build a Tx

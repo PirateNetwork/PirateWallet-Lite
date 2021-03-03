@@ -27,7 +27,7 @@ rm -rf release/signatures
 mkdir -p release/signatures 
 
 # Staple the notarization
-xcrun stapler staple artifacts/macOS-zecwallet-lite-v$APP_VERSION.dmg
+xcrun stapler staple artifacts/macOS-zerwallet-lite-v$APP_VERSION.dmg
 
 cd artifacts
 
@@ -38,7 +38,7 @@ rm -f signatures-v$APP_VERSION.tar.gz
 # sha256sum the binaries
 gsha256sum *$APP_VERSION* > sha256sum-v$APP_VERSION.txt
 
-for i in $( ls *zecwallet-lite-v$APP_VERSION* sha256sum-v$APP_VERSION* ); do
+for i in $( ls *zerwallet-lite-v$APP_VERSION* sha256sum-v$APP_VERSION* ); do
   echo "Signing" $i
   gpg --batch --output ../release/signatures/$i.sig --detach-sig $i 
 done

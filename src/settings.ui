@@ -81,74 +81,35 @@
        <string>Options</string>
       </attribute>
       <layout class="QGridLayout" name="gridLayout">
-       <item row="6" column="1">
-        <widget class="QComboBox" name="comboBoxTheme">
-         <property name="sizePolicy">
-          <sizepolicy hsizetype="MinimumExpanding" vsizetype="Fixed">
-           <horstretch>0</horstretch>
-           <verstretch>0</verstretch>
-          </sizepolicy>
-         </property>
-         <item>
-          <property name="text">
-           <string>default</string>
-          </property>
-         </item>
-         <item>
-          <property name="text">
-           <string>blue</string>
-          </property>
-         </item>
-         <item>
-          <property name="text">
-           <string>light</string>
-          </property>
-         </item>
-         <item>
-          <property name="text">
-           <string>dark</string>
-          </property>
-         </item>
-        </widget>
-       </item>
-       <item row="2" column="0" colspan="2">
-        <widget class="QCheckBox" name="chkFetchPrices">
+       <item row="7" column="1">
+        <widget class="QLabel" name="label_12">
          <property name="text">
-          <string>Fetch ZEC / USD prices</string>
+          <string>Show Change Transactions in the transaction list</string>
          </property>
         </widget>
        </item>
-       <item row="0" column="0" colspan="2">
-        <widget class="QCheckBox" name="chkCheckUpdates">
-         <property name="text">
-          <string>Check github for updates at startup</string>
-         </property>
-        </widget>
-       </item>
-       <item row="1" column="0" colspan="2">
+       <item row="1" column="1">
         <widget class="QLabel" name="label_8">
          <property name="text">
           <string>Connect to github on startup to check for updates</string>
          </property>
         </widget>
        </item>
-       <item row="6" column="0">
-        <widget class="QLabel" name="label_20">
-         <property name="sizePolicy">
-          <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
-           <horstretch>0</horstretch>
-           <verstretch>0</verstretch>
-          </sizepolicy>
-         </property>
+       <item row="5" column="1">
+        <widget class="QLabel" name="label_11">
          <property name="text">
-          <string>Theme</string>
-         </property>
-         <property name="alignment">
-          <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+          <string>Show Tx Fee in the transaction list</string>
          </property>
         </widget>
        </item>
-       <item row="8" column="0" colspan="2">
+       <item row="2" column="1">
+        <widget class="QCheckBox" name="chkFetchPrices">
+         <property name="text">
+          <string>Fetch ZER / USD prices</string>
+         </property>
+        </widget>
+       </item>
+       <item row="13" column="1">
         <spacer name="verticalSpacer_2">
          <property name="orientation">
           <enum>Qt::Vertical</enum>
@@ -161,7 +122,28 @@
          </property>
         </spacer>
        </item>
-       <item row="7" column="0" colspan="2">
+       <item row="3" column="1">
+        <widget class="QLabel" name="label_10">
+         <property name="text">
+          <string>Connect to the internet to fetch ZER prices</string>
+         </property>
+        </widget>
+       </item>
+       <item row="4" column="1">
+        <widget class="QCheckBox" name="chkShowTxFee">
+         <property name="text">
+          <string>Show Tx Fee</string>
+         </property>
+        </widget>
+       </item>
+       <item row="6" column="1">
+        <widget class="QCheckBox" name="chkShowChangeTxns">
+         <property name="text">
+          <string>Show Change Tx</string>
+         </property>
+        </widget>
+       </item>
+       <item row="12" column="1">
         <widget class="Line" name="line_2">
          <property name="sizePolicy">
           <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
@@ -174,12 +156,88 @@
          </property>
         </widget>
        </item>
-       <item row="3" column="0" colspan="2">
-        <widget class="QLabel" name="label_10">
+       <item row="0" column="1">
+        <widget class="QCheckBox" name="chkCheckUpdates">
          <property name="text">
-          <string>Connect to the internet to fetch ZEC prices</string>
+          <string>Check github for updates at startup</string>
          </property>
         </widget>
+       </item>
+       <item row="8" column="1">
+        <layout class="QGridLayout" name="gridLayout_2">
+         <item row="0" column="1">
+          <widget class="QLabel" name="label_20">
+           <property name="sizePolicy">
+            <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
+             <horstretch>0</horstretch>
+             <verstretch>0</verstretch>
+            </sizepolicy>
+           </property>
+           <property name="text">
+            <string>Theme</string>
+           </property>
+           <property name="alignment">
+            <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+           </property>
+          </widget>
+         </item>
+         <item row="0" column="2" alignment="Qt::AlignRight">
+          <widget class="QComboBox" name="comboBoxTheme">
+           <property name="sizePolicy">
+            <sizepolicy hsizetype="MinimumExpanding" vsizetype="Fixed">
+             <horstretch>0</horstretch>
+             <verstretch>0</verstretch>
+            </sizepolicy>
+           </property>
+           <property name="currentText">
+            <string>zero</string>
+           </property>
+           <item>
+            <property name="text">
+             <string>default</string>
+            </property>
+           </item>
+           <item>
+            <property name="text">
+             <string>blue</string>
+            </property>
+           </item>
+           <item>
+            <property name="text">
+             <string>light</string>
+            </property>
+           </item>
+           <item>
+            <property name="text">
+             <string>dark</string>
+            </property>
+           </item>
+           <item>
+            <property name="text">
+             <string>matrix</string>
+            </property>
+           </item>
+           <item>
+            <property name="text">
+             <string>zero</string>
+            </property>
+           </item>
+          </widget>
+         </item>
+         <item row="0" column="0">
+          <spacer name="horizontalSpacer">
+           <property name="orientation">
+            <enum>Qt::Horizontal</enum>
+           </property>
+           <property name="sizeHint" stdset="0">
+            <size>
+             <width>40</width>
+             <height>20</height>
+            </size>
+           </property>
+          </spacer>
+         </item>
+        </layout>
        </item>
       </layout>
      </widget>
