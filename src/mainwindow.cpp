@@ -24,7 +24,7 @@ MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent),
     ui(new Ui::MainWindow)
 {
-	// Include css    
+	// Include css
     QString theme_name;
     try
     {
@@ -37,14 +37,14 @@ MainWindow::MainWindow(QWidget *parent) :
 
     this->slot_change_theme(theme_name);
 
-	    
+
     ui->setupUi(this);
     logger = new Logger(this, QDir(QStandardPaths::writableLocation(QStandardPaths::AppDataLocation)).filePath("arrr-qt-wallet.log"));
 
     // Status Bar
     setupStatusBar();
-    
-    // Settings editor 
+
+    // Settings editor
     setupSettingsModal();
 
     // Set up exit action
@@ -69,7 +69,7 @@ MainWindow::MainWindow(QWidget *parent) :
         rpc->checkForUpdate(false);
     });
 
-    // Recurring payments 
+    // Recurring payments
     QObject::connect(ui->action_Recurring_Payments, &QAction::triggered, [=]() {
         Recurring::getInstance()->showRecurringDialog(this);
     });
@@ -113,7 +113,7 @@ MainWindow::MainWindow(QWidget *parent) :
     // Rescan
     QObject::connect(ui->actionRescan, &QAction::triggered, [=]() {
         // To rescan, we clear the wallet state, and then reload the connection
-        // This will start a sync, and show the scanning status. 
+        // This will start a sync, and show the scanning status.
         this->getRPC()->clearWallet([=] (auto) {
             // Save the wallet
             this->getRPC()->saveWallet([=] (auto) {
@@ -136,7 +136,7 @@ MainWindow::MainWindow(QWidget *parent) :
 
         QString version    = QString("Version ") % QString(APP_VERSION) % " (" % QString(__DATE__) % ")";
         about.versionLabel->setText(version);
-        
+
         aboutDialog.exec();
     });
 
@@ -168,7 +168,7 @@ MainWindow::MainWindow(QWidget *parent) :
         createWebsocket(wormholecode);
     }
 }
- 
+
 void MainWindow::createWebsocket(QString wormholecode) {
     qDebug() << "Listening for app connections on port 8877";
     // Create the websocket server, for listening to direct connections
@@ -244,7 +244,7 @@ void MainWindow::encryptWallet() {
     // Check if wallet is already encrypted
     auto encStatus = rpc->getModel()->getEncryptionStatus();
     if (encStatus.first) {
-        QMessageBox::information(this, tr("Wallet is already encrypted"), 
+        QMessageBox::information(this, tr("Wallet is already encrypted"),
                     tr("Your wallet is already encrypted with a password.\nPlease use 'Remove Wallet Encryption' if you want to remove the wallet encryption."),
                     QMessageBox::Ok
                 );
@@ -258,7 +258,7 @@ void MainWindow::encryptWallet() {
     // Handle edits on the password box
     auto fnPasswordEdited = [=](const QString&) {
         // Enable the OK button if the passwords match.
-        if (!ed.txtPassword->text().isEmpty() && 
+        if (!ed.txtPassword->text().isEmpty() &&
                 ed.txtPassword->text() == ed.txtConfirmPassword->text()) {
             ed.lblPasswordMatch->setText("");
             ed.buttonBox->button(QDialogButtonBox::Ok)->setEnabled(true);
@@ -287,7 +287,7 @@ void MainWindow::encryptWallet() {
                 // Save the wallet
                 rpc->saveWallet([=] (json reply) {
                     if (isJsonResultSuccess(reply)) {
-                        QMessageBox::information(this, tr("Wallet Encrypted"), 
+                        QMessageBox::information(this, tr("Wallet Encrypted"),
                             tr("Your wallet was successfully encrypted! The password will be needed to send funds or export private keys."),
                             QMessageBox::Ok
                         );
@@ -309,7 +309,7 @@ void MainWindow::removeWalletEncryption() {
     // Check if wallet is already encrypted
     auto encStatus = rpc->getModel()->getEncryptionStatus();
     if (!encStatus.first) {
-        QMessageBox::information(this, tr("Wallet is not encrypted"), 
+        QMessageBox::information(this, tr("Wallet is not encrypted"),
                     tr("Your wallet is not encrypted with a password."),
                     QMessageBox::Ok
                 );
@@ -317,7 +317,7 @@ void MainWindow::removeWalletEncryption() {
     }
 
     bool ok;
-    QString password = QInputDialog::getText(this, tr("Wallet Password"), 
+    QString password = QInputDialog::getText(this, tr("Wallet Password"),
                             tr("Please enter your wallet password"), QLineEdit::Password, "", &ok);
 
     // If cancel was pressed, just return
@@ -338,7 +338,7 @@ void MainWindow::removeWalletEncryption() {
                 // Save the wallet
                 rpc->saveWallet([=] (json reply) {
                     if(isJsonResultSuccess(reply)) {
-                        QMessageBox::information(this, tr("Wallet Encryption Removed"), 
+                        QMessageBox::information(this, tr("Wallet Encryption Removed"),
                             tr("Your wallet was successfully decrypted! You will no longer need a password to send funds or export private keys."),
                             QMessageBox::Ok
                         );
@@ -358,7 +358,7 @@ void MainWindow::removeWalletEncryption() {
                     QMessageBox::Ok
                 );
             }
-    });            
+    });
 }
 
 void MainWindow::setupStatusBar() {
@@ -403,7 +403,7 @@ void MainWindow::setupStatusBar() {
     ui->statusBar->addPermanentWidget(statusIcon);
 }
 
-void MainWindow::setupSettingsModal() {    
+void MainWindow::setupSettingsModal() {
     // Set up File -> Settings action
     QObject::connect(ui->actionSettings, &QAction::triggered, [=]() {
         QDialog settingsDialog(this);
@@ -426,11 +426,11 @@ void MainWindow::setupSettingsModal() {
 
         // Fetch prices
         settings.chkFetchPrices->setChecked(Settings::getInstance()->getAllowFetchPrices());
-        
+
         // List of default servers
         settings.cmbServer->addItem("https://lightd.pirate.black:443");
 
-        // Load current values into the dialog        
+        // Load current values into the dialog
         auto conf = Settings::getInstance()->getSettings();
         settings.cmbServer->setCurrentText(conf.server);
 
@@ -524,14 +524,14 @@ void MainWindow::donate() {
 
 //     if (key.startsWith("SK") ||
 //         key.startsWith("secret")) { // Z key
-//         rpc->importZPrivKey(key, rescan, [=] (auto) { this->doImport(keys); });                   
+//         rpc->importZPrivKey(key, rescan, [=] (auto) { this->doImport(keys); });
 //     } else {
 //         rpc->importTPrivKey(key, rescan, [=] (auto) { this->doImport(keys); });
 //     }
 // }
 
 
-// Callback invoked when the RPC has finished loading all the balances, and the UI 
+// Callback invoked when the RPC has finished loading all the balances, and the UI
 // is now ready to send transactions.
 void MainWindow::balancesReady() {
     // First-time check
@@ -592,7 +592,7 @@ void MainWindow::payZcashURI(QString uri, QString myAddr) {
     qDebug() << "Received URI " << uri;
     PaymentURI paymentInfo = Settings::parseURI(uri);
     if (!paymentInfo.error.isEmpty()) {
-        QMessageBox::critical(this, tr("Error paying pirate URI"), 
+        QMessageBox::critical(this, tr("Error paying pirate URI"),
                 tr("URI should be of the form 'pirate:<addr>?amt=x&memo=y") + "\n" + paymentInfo.error);
         return;
     }
@@ -626,7 +626,7 @@ void MainWindow::payZcashURI(QString uri, QString myAddr) {
 //     pui.buttonBox->button(QDialogButtonBox::Save)->setVisible(false);
 //     pui.helpLbl->setText(QString() %
 //                         tr("Please paste your private keys (z-Addr or t-Addr) here, one per line") % ".\n" %
-//                         tr("The keys will be imported into your connected zcashd node"));  
+//                         tr("The keys will be imported into your connected zcashd node"));
 
 //     if (d.exec() == QDialog::Accepted && !pui.privKeyTxt->toPlainText().trimmed().isEmpty()) {
 //         auto rawkeys = pui.privKeyTxt->toPlainText().trimmed().split("\n");
@@ -642,8 +642,8 @@ void MainWindow::payZcashURI(QString uri, QString myAddr) {
 //             return key.trimmed().split(" ")[0];
 //         });
 
-//         // Special case. 
-//         // Sometimes, when importing from a paperwallet or such, the key is split by newlines, and might have 
+//         // Special case.
+//         // Sometimes, when importing from a paperwallet or such, the key is split by newlines, and might have
 //         // been pasted like that. So check to see if the whole thing is one big private key
 //         if (Settings::getInstance()->isValidSaplingPrivateKey(keys->join(""))) {
 //             auto multiline = keys;
@@ -655,31 +655,31 @@ void MainWindow::payZcashURI(QString uri, QString myAddr) {
 //         // Start the import. The function takes ownership of keys
 //         QTimer::singleShot(1, [=]() {doImport(keys);});
 
-//         // Show the dialog that keys will be imported. 
+//         // Show the dialog that keys will be imported.
 //         QMessageBox::information(this,
 //             "Imported", tr("The keys were imported. It may take several minutes to rescan the blockchain. Until then, functionality may be limited"),
 //             QMessageBox::Ok);
 //     }
 // }
 
-/** 
+/**
  * Export transaction history into a CSV file
  */
 void MainWindow::exportTransactions() {
     // First, get the export file name
     QString exportName = "pirate-transactions-" + QDateTime::currentDateTime().toString("yyyyMMdd") + ".csv";
 
-    QUrl csvName = QFileDialog::getSaveFileUrl(this, 
+    QUrl csvName = QFileDialog::getSaveFileUrl(this,
             tr("Export transactions"), exportName, "CSV file (*.csv)");
 
     if (csvName.isEmpty())
         return;
 
     if (!rpc->getTransactionsModel()->exportToCsv(csvName.toLocalFile())) {
-        QMessageBox::critical(this, tr("Error"), 
+        QMessageBox::critical(this, tr("Error"),
             tr("Error exporting transactions, file was not saved"), QMessageBox::Ok);
     }
-} 
+}
 
 /**
  * Export the seed phrase.
@@ -688,17 +688,17 @@ void MainWindow::exportSeed() {
     if (!rpc->getConnection())
         return;
 
-    
+
 
     rpc->fetchSeed([=](json reply) {
         if (isJsonError(reply)) {
             return;
         }
-        
+
         QDialog d(this);
         Ui_PrivKey pui;
         pui.setupUi(&d);
-        
+
         // Make the window big by default
         auto ps = this->geometry();
         QMargins margin = QMargins() + 50;
@@ -709,7 +709,7 @@ void MainWindow::exportSeed() {
         pui.privKeyTxt->setReadOnly(true);
         pui.privKeyTxt->setLineWrapMode(QPlainTextEdit::LineWrapMode::NoWrap);
         pui.privKeyTxt->setPlainText(QString::fromStdString(reply.dump()));
-        
+
         pui.helpLbl->setText(tr("This is your wallet seed. Please back it up carefully and safely."));
 
         // Wire up save button
@@ -720,13 +720,13 @@ void MainWindow::exportSeed() {
             if (!file.open(QIODevice::WriteOnly)) {
                 QMessageBox::information(this, tr("Unable to open file"), file.errorString());
                 return;
-            }        
+            }
             QTextStream out(&file);
             out << pui.privKeyTxt->toPlainText();
         });
 
         pui.buttonBox->button(QDialogButtonBox::Save)->setEnabled(true);
-        
+
         d.exec();
     });
 }
@@ -743,7 +743,7 @@ void MainWindow::exportKeys(QString addr) {
 
     auto fnUpdateUIWithKeys = [=](json reply) {
         if (isJsonError(reply)) {
-            return;                
+            return;
         }
 
         if (reply.is_discarded() || !reply.is_array()) {
@@ -752,11 +752,11 @@ void MainWindow::exportKeys(QString addr) {
                 QMessageBox::Ok);
             return;
         }
-            
+
         QDialog d(this);
         Ui_PrivKey pui;
         pui.setupUi(&d);
-        
+
         // Make the window big by default
         auto ps = this->geometry();
         QMargins margin = QMargins() + 50;
@@ -781,7 +781,7 @@ void MainWindow::exportKeys(QString addr) {
             if (!file.open(QIODevice::WriteOnly)) {
                 QMessageBox::information(this, tr("Unable to open file"), file.errorString());
                 return;
-            }        
+            }
             QTextStream out(&file);
             out << pui.privKeyTxt->toPlainText();
         });
@@ -800,9 +800,9 @@ void MainWindow::exportKeys(QString addr) {
     if (allKeys) {
         rpc->fetchAllPrivKeys(fnUpdateUIWithKeys);
     }
-    else { 
-        rpc->fetchPrivKey(addr, fnUpdateUIWithKeys);                
-    }    
+    else {
+        rpc->fetchPrivKey(addr, fnUpdateUIWithKeys);
+    }
 }
 
 void MainWindow::setupBalancesTab() {
@@ -825,7 +825,7 @@ void MainWindow::setupBalancesTab() {
 
         menu.addAction(tr("Copy address"), [=] () {
             QClipboard *clipboard = QGuiApplication::clipboard();
-            clipboard->setText(addr);            
+            clipboard->setText(addr);
             ui->statusBar->showMessage(tr("Copied to clipboard"), 3 * 1000);
         });
 
@@ -840,11 +840,11 @@ void MainWindow::setupBalancesTab() {
         //     });
         // }
 
-        menu.exec(ui->balancesTable->viewport()->mapToGlobal(pos));            
+        menu.exec(ui->balancesTable->viewport()->mapToGlobal(pos));
     });
 }
 
-void MainWindow::setupZcashdTab() {    
+void MainWindow::setupZcashdTab() {
     ui->zcashdlogo->setBasePixmap(QPixmap(":/img/res/piratedlogo.svg"));
 }
 
@@ -880,7 +880,7 @@ void MainWindow::setupTransactionsTab() {
         QString memo = txModel->getMemo(index.row());
         QString addr = txModel->getAddr(index.row());
 
-        menu.addAction(tr("Copy txid"), [=] () {            
+        menu.addAction(tr("Copy txid"), [=] () {
             QGuiApplication::clipboard()->setText(txid);
             ui->statusBar->showMessage(tr("Copied to clipboard"), 3 * 1000);
         });
@@ -905,7 +905,7 @@ void MainWindow::setupTransactionsTab() {
 
         // View Memo
         if (!memo.isEmpty()) {
-            menu.addAction(tr("View Memo"), [=] () {               
+            menu.addAction(tr("View Memo"), [=] () {
                 QMessageBox mb(QMessageBox::Information, tr("Memo"), memo, QMessageBox::Ok, this);
                 // Don't render html in the memo to avoid phishing-type attacks
                 // revist this in the future once the design  of how to best handle memo based applications exists.
@@ -919,8 +919,8 @@ void MainWindow::setupTransactionsTab() {
         if (!memo.isEmpty()) {
             int lastPost     = memo.trimmed().lastIndexOf(QRegExp("[\r\n]+"));
             QString lastWord = memo.right(memo.length() - lastPost - 1);
-            
-            if (Settings::getInstance()->isSaplingAddress(lastWord) || 
+
+            if (Settings::getInstance()->isSaplingAddress(lastWord) ||
                 Settings::getInstance()->isSproutAddress(lastWord)) {
                 menu.addAction(tr("Reply to ") + lastWord.left(25) + "...", [=]() {
                     // First, cancel any pending stuff in the send tab by pretending to click
@@ -943,7 +943,7 @@ void MainWindow::setupTransactionsTab() {
             }
         }
 
-        menu.exec(ui->transactionsTable->viewport()->mapToGlobal(pos));        
+        menu.exec(ui->transactionsTable->viewport()->mapToGlobal(pos));
     });
 }
 
@@ -955,11 +955,11 @@ void MainWindow::addNewZaddr(bool sapling) {
 
         // Just double make sure the z-address is still checked
         if ( sapling && ui->rdioZSAddr->isChecked() ) {
-            ui->listReceiveAddresses->insertItem(0, addr); 
+            ui->listReceiveAddresses->insertItem(0, addr);
             ui->listReceiveAddresses->setCurrentIndex(0);
 
             ui->statusBar->showMessage(QString::fromStdString("Created new zAddr") %
-                                       (sapling ? "(Sapling)" : "(Sprout)"), 
+                                       (sapling ? "(Sapling)" : "(Sprout)"),
                                        10 * 1000);
         }
     });
@@ -969,8 +969,8 @@ void MainWindow::addNewZaddr(bool sapling) {
 // Adds sapling or sprout z-addresses to the combo box. Technically, returns a
 // lambda, which can be connected to the appropriate signal
 std::function<void(bool)> MainWindow::addZAddrsToComboList(bool sapling) {
-    return [=] (bool checked) { 
-        if (checked) { 
+    return [=] (bool checked) {
+        if (checked) {
             auto addrs = this->rpc->getModel()->getAllZAddresses();
 
             // Save the current address, so we can update it later
@@ -979,12 +979,12 @@ std::function<void(bool)> MainWindow::addZAddrsToComboList(bool sapling) {
 
             std::for_each(addrs.begin(), addrs.end(), [=] (auto addr) {
                 if ( (sapling &&  Settings::getInstance()->isSaplingAddress(addr)) ||
-                    (!sapling && !Settings::getInstance()->isSaplingAddress(addr))) {                        
+                    (!sapling && !Settings::getInstance()->isSaplingAddress(addr))) {
                         auto bal = rpc->getModel()->getAllBalances().value(addr);
                         ui->listReceiveAddresses->addItem(addr, bal);
                 }
-            }); 
-            
+            });
+
             if (!zaddr.isEmpty() && Settings::isZAddress(zaddr)) {
                 ui->listReceiveAddresses->setCurrentText(zaddr);
             }
@@ -993,7 +993,7 @@ std::function<void(bool)> MainWindow::addZAddrsToComboList(bool sapling) {
             if (addrs.isEmpty()) {
                 addNewZaddr(sapling);
             }
-        } 
+        }
     };
 }
 
@@ -1015,15 +1015,12 @@ void MainWindow::setupReceiveTab() {
     // };
 
     // Connect t-addr radio button
-    QObject::connect(ui->rdioTAddr, &QRadioButton::toggled, [=] (bool checked) { 
+    QObject::connect(ui->rdioTAddr, &QRadioButton::toggled, [=] (bool checked) {
         // Whenever the t-address is selected, we generate a new address, because we don't
         // want to reuse t-addrs
-        if (checked) { 
+        if (checked) {
             updateTAddrCombo(checked);
-        } 
-
-        // Toggle the "View all addresses" button as well
-        ui->btnViewAllAddresses->setVisible(checked);
+        }
     });
 
     // View all addresses goes to "View all private keys"
@@ -1053,7 +1050,7 @@ void MainWindow::setupReceiveTab() {
             QString addr = viewaddrs.tblAddresses->model()->data(index).toString();
 
             QMenu menu(this);
-            menu.addAction(tr("Export Private Key"), [=] () {                
+            menu.addAction(tr("Export Private Key"), [=] () {
                 if (addr.isEmpty())
                     return;
 
@@ -1075,6 +1072,20 @@ void MainWindow::setupReceiveTab() {
         if (!rpc->getConnection())
             return;
 
+        // Go over the dropdown and just select the next address that has:
+        // 0 balance and has no labels
+        for (int i=ui->listReceiveAddresses->currentIndex()+1; i < ui->listReceiveAddresses->count(); i++) {
+            QString item = ui->listReceiveAddresses->itemText(i);
+            CAmount bal = getRPC()->getModel()->getAllBalances().value(item, CAmount());
+            if (bal == 0 && AddressBook::getInstance()->getLabelForAddress(item).isEmpty()) {
+                // Pick this one, since it has no balance and no label
+                ui->listReceiveAddresses->setCurrentIndex(i);
+                return;
+            }
+        }
+
+        // If none of the existing items were eligible, create a new one.
+
         if (ui->rdioZSAddr->isChecked()) {
             addNewZaddr(true);
         } else if (ui->rdioTAddr->isChecked()) {
@@ -1087,8 +1098,7 @@ void MainWindow::setupReceiveTab() {
         if (tab == 2) {
             // Switched to receive tab, select the z-addr radio button
             ui->rdioZSAddr->setChecked(true);
-            ui->btnViewAllAddresses->setVisible(false);
-            
+
             // And then select the first one
             ui->listReceiveAddresses->setCurrentIndex(0);
         }
@@ -1099,7 +1109,7 @@ void MainWindow::setupReceiveTab() {
     ui->rcvLabel->setValidator(v);
 
     // Select item in address list
-    QObject::connect(ui->listReceiveAddresses, 
+    QObject::connect(ui->listReceiveAddresses,
         QOverload<int>::of(&QComboBox::currentIndexChanged), [=] (int index) {
         QString addr = ui->listReceiveAddresses->itemText(index);
         if (addr.isEmpty()) {
@@ -1119,18 +1129,18 @@ void MainWindow::setupReceiveTab() {
         else {
             ui->rcvUpdateLabel->setText("Update Label");
         }
-        
+
         ui->rcvLabel->setText(label);
         ui->rcvBal->setText(rpc->getModel()->getAllBalances().value(addr).toDecimalZECUSDString());
-        ui->txtReceive->setPlainText(addr);       
+        ui->txtReceive->setPlainText(addr);
         ui->qrcodeDisplay->setQrcodeString(addr);
         if (rpc->getModel()->getUsedAddresses().value(addr, false)) {
             ui->rcvBal->setToolTip(tr("Address has been previously used"));
         } else {
             ui->rcvBal->setToolTip(tr("Address is unused"));
         }
-        
-    });    
+
+    });
 
     // Receive tab add/update label
     QObject::connect(ui->rcvUpdateLabel, &QPushButton::clicked, [=]() {
@@ -1201,7 +1211,7 @@ void MainWindow::updateTAddrCombo(bool checked) {
         //         addrs.insert(addr);
         //     }
         // });
-        
+
         // 2. Add all t addresses that have a label - unnecessary for Pirate
         // auto allTaddrs = this->rpc->getModel()->getAllTAddresses();
         // QSet<QString> labels;
@@ -1209,7 +1219,7 @@ void MainWindow::updateTAddrCombo(bool checked) {
         //     labels.insert(p.second);
         // }
         // std::for_each(allTaddrs.begin(), allTaddrs.end(), [=, &addrs] (auto& taddr) {
-        //     // If the address is in the address book, add it. 
+        //     // If the address is in the address book, add it.
         //     if (labels.contains(taddr) && !addrs.contains(taddr)) {
         //         addrs.insert(taddr);
         //         ui->listReceiveAddresses->addItem(taddr, CAmount::fromqint64(0));
@@ -1282,7 +1292,7 @@ void MainWindow::slot_change_theme(const QString& theme_name)
     if (qFile.open(QFile::ReadOnly))
     {
       QString styleSheet = QLatin1String(qFile.readAll());
-      this->setStyleSheet(""); // reset styles    
+      this->setStyleSheet(""); // reset styles
       this->setStyleSheet(styleSheet);
     }
 

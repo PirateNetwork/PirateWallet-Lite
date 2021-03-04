@@ -22,7 +22,7 @@
     <item row="0" column="0">
      <widget class="QTabWidget" name="tabWidget">
       <property name="currentIndex">
-       <number>1</number>
+       <number>2</number>
       </property>
       <widget class="QWidget" name="tab">
        <attribute name="title">
@@ -739,7 +739,7 @@
                <item>
                 <widget class="QPushButton" name="btnReceiveNewAddr">
                  <property name="text">
-                  <string>New Address</string>
+                  <string>Next Address</string>
                  </property>
                 </widget>
                </item>

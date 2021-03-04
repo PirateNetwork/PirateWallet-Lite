@@ -63,7 +63,7 @@ public slots:
     void processRPCCallback(json resp);
     void processError(QString error);
 
-private: 
+private:
     std::function<void(json)> cb;
     std::function<void(QString)> errCb;
 
@@ -72,14 +72,14 @@ private:
 /**
  * A runnable that runs some lightclient Command in a non-UI thread.
  * It emits the "responseReady" signal, which should be processed in a GUI thread.
- * 
+ *
  * Since the autoDelete flag is ON, the runnable should be destroyed automatically
- * by the threadpool. 
+ * by the threadpool.
  */
 class Executor : public QObject, public QRunnable {
     Q_OBJECT
 
-public: 
+public:
     Executor(QString cmd, QString args) {
         this->cmd = cmd;
         this->args = args;
@@ -96,7 +96,7 @@ signals:
 
 private:
     QString cmd;
-    QString args;    
+    QString args;
 };
 
 /**
@@ -115,8 +115,8 @@ public:
 
     void shutdown();
 
-    
-    void doRPC(const QString cmd, const QString args, const std::function<void(json)>& cb, 
+
+    void doRPC(const QString cmd, const QString args, const std::function<void(json)>& cb,
                const std::function<void(QString)>& errCb);
     void doRPCWithDefaultErrorHandling(const QString cmd, const QString args, const std::function<void(json)>& cb);
     void doRPCIgnoreError(const QString cmd, const QString args, const std::function<void(json)>& cb) ;

@@ -15,12 +15,12 @@ Copy-Item release/$target/komodo-cli.exe     release/wininstaller/
 
 Get-Content src/scripts/pirate-qt-wallet.wxs | ForEach-Object { $_ -replace "RELEASE_VERSION", "$version" } | Out-File -Encoding utf8 release/wininstaller/pirate-qt-wallet.wxs
 
-candle.exe release/wininstaller/pirate-qt-wallet.wxs -o release/wininstaller/pirate-qt-wallet.wixobj 
+candle.exe release/wininstaller/pirate-qt-wallet.wxs -o release/wininstaller/pirate-qt-wallet.wixobj
 if (!$?) {
     exit 1;
 }
 
-light.exe -ext WixUIExtension -cultures:en-us release/wininstaller/pirate-qt-wallet.wixobj -out release/wininstaller/piratewallet.msi 
+light.exe -ext WixUIExtension -cultures:en-us release/wininstaller/pirate-qt-wallet.wixobj -out release/wininstaller/piratewallet.msi
 if (!$?) {
     exit 1;
 }
