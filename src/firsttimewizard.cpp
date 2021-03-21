@@ -4,7 +4,7 @@
 #include "ui_restoreseed.h"
 #include "ui_newwallet.h"
 
-#include "../lib/arrrwalletlitelib.h"
+#include "../res/libzecwalletlite/zecwalletlitelib.h"
 
 using json = nlohmann::json;
 
@@ -27,7 +27,7 @@ int FirstTimeWizard::nextId() const {
                 return Page_New;
             } else {
                 return Page_Restore;
-            }            
+            }
         case Page_New:
         case Page_Restore:
         default:
@@ -75,13 +75,13 @@ NewSeedPage::NewSeedPage(FirstTimeWizard *parent) : QWizardPage(parent) {
 
     QVBoxLayout *layout = new QVBoxLayout;
     layout->addWidget(pageWidget);
-    
+
     setLayout(layout);
 }
 
 void NewSeedPage::initializePage() {
     // Call the library to create a new wallet.
-    char* resp = litelib_initialize_new(parent->dangerous, parent->server.toStdString().c_str());
+    char* resp = litelib_initialize_new(parent->server.toStdString().c_str());
     QString reply = litelib_process_response(resp);
 
     auto parsed = json::parse(reply.toStdString().c_str(), nullptr, false);
@@ -101,7 +101,7 @@ bool NewSeedPage::validatePage() {
 
     auto parsed = json::parse(reply.toStdString().c_str(), nullptr, false);
     if (parsed.is_discarded() || parsed.is_null() || parsed.find("result") == parsed.end()) {
-        QMessageBox::warning(this, tr("Failed to save wallet"), 
+        QMessageBox::warning(this, tr("Failed to save wallet"),
             tr("Couldn't save the wallet") + "\n" + reply,
             QMessageBox::Ok);
         return false;
@@ -121,7 +121,7 @@ RestoreSeedPage::RestoreSeedPage(FirstTimeWizard *parent) : QWizardPage(parent) 
 
     QVBoxLayout *layout = new QVBoxLayout;
     layout->addWidget(pageWidget);
-    
+
     setLayout(layout);
 }
 
@@ -129,7 +129,7 @@ bool RestoreSeedPage::validatePage() {
     // 1. Validate that we do have 24 words
     QString seed = form.txtSeed->toPlainText().replace(QRegExp("[ \n\r\t]+"), " ");
     if (seed.trimmed().split(" ").length() != 24) {
-        QMessageBox::warning(this, tr("Failed to restore wallet"), 
+        QMessageBox::warning(this, tr("Failed to restore wallet"),
             tr("PirateWallet needs 24 words to restore wallet"),
             QMessageBox::Ok);
         return false;
@@ -140,7 +140,7 @@ bool RestoreSeedPage::validatePage() {
     bool ok;
     qint64 birthday = birthday_str.toUInt(&ok);
     if (!ok) {
-        QMessageBox::warning(this, tr("Failed to parse wallet birthday"), 
+        QMessageBox::warning(this, tr("Failed to parse wallet birthday"),
             tr("Couldn't understand wallet birthday. This should be a block height from where to rescan the wallet. You can leave it as '0' if you don't know what it should be."),
             QMessageBox::Ok);
         return false;
@@ -148,16 +148,16 @@ bool RestoreSeedPage::validatePage() {
 
     // 3. Attempt to restore wallet with the seed phrase
     {
-        char* resp = litelib_initialize_new_from_phrase(parent->dangerous, parent->server.toStdString().c_str(),
+        char* resp = litelib_initialize_new_from_phrase(parent->server.toStdString().c_str(),
                 seed.toStdString().c_str(), birthday);
         QString reply = litelib_process_response(resp);
 
         if (reply.toUpper().trimmed() != "OK") {
-            QMessageBox::warning(this, tr("Failed to restore wallet"), 
+            QMessageBox::warning(this, tr("Failed to restore wallet"),
                 tr("Couldn't restore the wallet") + "\n" + reply,
                 QMessageBox::Ok);
             return false;
-        } 
+        }
     }
 
     // 4. Finally attempt to save the wallet
@@ -167,12 +167,12 @@ bool RestoreSeedPage::validatePage() {
 
         auto parsed = json::parse(reply.toStdString().c_str(), nullptr, false);
         if (parsed.is_discarded() || parsed.is_null() || parsed.find("result") == parsed.end()) {
-            QMessageBox::warning(this, tr("Failed to save wallet"), 
+            QMessageBox::warning(this, tr("Failed to save wallet"),
                 tr("Couldn't save the wallet") + "\n" + reply,
                 QMessageBox::Ok);
             return false;
         } else {
             return true;
-        }         
+        }
     }
 }

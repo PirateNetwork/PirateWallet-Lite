@@ -90,7 +90,7 @@ HEADERS += \
     src/controller.h \
     src/liteinterface.h \
     src/camount.h \
-    lib/arrrwalletlitelib.h 
+    res/libzecwalletlite/zecwalletlitelib.h
 
 FORMS += \
     src/encryption.ui \
@@ -104,7 +104,7 @@ FORMS += \
     src/about.ui \
     src/confirm.ui \
     src/privkey.ui \
-    src/memodialog.ui \ 
+    src/memodialog.ui \
     src/viewalladdresses.ui \
     src/connection.ui \
     src/addressbook.ui \
@@ -113,7 +113,7 @@ FORMS += \
     src/recurringdialog.ui \
     src/newrecurring.ui \
     src/requestdialog.ui \
-    src/recurringmultiple.ui 
+    src/recurringmultiple.ui
 
 
 TRANSLATIONS = res/arrr_qt_wallet_es.ts \
@@ -122,7 +122,7 @@ TRANSLATIONS = res/arrr_qt_wallet_es.ts \
                res/arrr_qt_wallet_pt.ts \
                res/arrr_qt_wallet_it.ts \
                res/arrr_qt_wallet_zh.ts \
-               res/arrr_qt_wallet_tr.ts 
+               res/arrr_qt_wallet_tr.ts
 
 include(singleapplication/singleapplication.pri)
 DEFINES += QAPPLICATION_CLASS=QApplication
@@ -138,30 +138,21 @@ else: unix:!android: target.path = /opt/$${TARGET}/bin
 !isEmpty(target.path): INSTALLS += target
 
 
-libsodium.target = $$PWD/res/libsodium.a
-libsodium.commands = res/libsodium/buildlibsodium.sh
+unix:       libsodium.target = $$PWD/res/unixlibs/libsodium.a
+else:win32: libsodium.target = $$PWD/res/win32libs/libsodium.a
 
-unix:        librust.target   = $$PWD/lib/target/release/libarrrwalletlite.a
-else:win32:  librust.target   = $$PWD/lib/target/x86_64-pc-windows-gnu/release/arrrwalletlite.lib
+unix:        librust.target   = $$PWD/res/libzecwalletlite.a
+else:win32:  librust.target   = $$PWD/res/zecwalletlite.lib
 
-unix:        librust.commands = $(MAKE) -C $$PWD/lib 
-else:win32:  librust.commands = $(MAKE) -C $$PWD/lib winrelease
+QMAKE_EXTRA_TARGETS += librust libsodium
+QMAKE_CLEAN += res/zecwalletlite.lib res/libzecwalletlite.a res/unixlibs/libsodium.a res/win32libs/libsodium.a
 
-librust.depends = lib/Cargo.toml lib/src/lib.rs
+win32: LIBS += -L$$PWD/res -lzecwalletlite -L$$PWD/res/win32libs -lsodium -lsecur32 -lcrypt32 -lncrypt
+else:macx: LIBS += -L$$PWD/res -lzecwalletlite -framework Security -framework Foundation -L$$PWD/res/unixlibs -lsodium
+else:unix: LIBS += -L$$PWD/res -lzecwalletlite -ldl -L$$PWD/res/unixlibs -lsodium
 
-librustclean.commands = "rm -rf $$PWD/lib/target"
-distclean.depends += librustclean
-
-
-QMAKE_EXTRA_TARGETS += librust libsodium librustclean distclean
-QMAKE_CLEAN += $$PWD/lib/target/release/libarrrwalletlite.a res/libsodium.a
-
-win32: LIBS += -L$$PWD/lib/target/x86_64-pc-windows-gnu/release -larrrwalletlite -L$$PWD/res/ -llibsodium
-else:macx: LIBS += -L$$PWD/lib/target/release -larrrwalletlite -framework Security -framework Foundation -L$$PWD/res/ -lsodium
-else:unix: LIBS += -L$$PWD/lib/target/release -larrrwalletlite -ldl -L$$PWD/res/ -lsodium
-
-win32: PRE_TARGETDEPS += $$PWD/lib/target/x86_64-pc-windows-gnu/release/arrrwalletlite.lib $$PWD/res/liblibsodium.a
-else:unix::PRE_TARGETDEPS += $$PWD/lib/target/release/libarrrwalletlite.a $$PWD/res/libsodium.a
+win32:PRE_TARGETDEPS += $$PWD/res/zecwalletlite.lib $$PWD/res/win32libs/libsodium.a
+else:PRE_TARGETDEPS += $$PWD/res/libzecwalletlite.a $$PWD/res/unixlibs/libsodium.a
 
 INCLUDEPATH += $$PWD/res
 DEPENDPATH += $$PWD/res

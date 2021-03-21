@@ -143,6 +143,8 @@ public:
         QCoreApplication::setAttribute(Qt::AA_UseHighDpiPixmaps);
         QCoreApplication::setAttribute(Qt::AA_EnableHighDpiScaling);
 
+        QApplication::setStyle("fusion");
+        
         SingleApplication a(argc, argv, true);
 
         // Command line parser

@@ -8,9 +8,8 @@
         <file>res/paymentreq.svg</file>
         <file>res/logo.ico</file>
     </qresource>
-    <qresource prefix="/img">
-        <file>res/piratedlogo.svg</file>
-        <file>res/logo.svg</file>
+    <qresource prefix="img">
+        <file>res/logo.png</file>
     </qresource>
     <qresource prefix="/translations">
         <file>res/arrr_qt_wallet_es.qm</file>
@@ -25,6 +24,13 @@
         <file>res/css/dark.css</file>
         <file>res/css/default.css</file>
         <file>res/css/light.css</file>
+        <file>res/css/armada.css</file>
+        <file>res/css/ghostship.css</file>
+        <file>res/css/night.css</file>
+        <file>res/css/pirate.css</file>
+        <file>res/css/piratemap.css</file>
+        <file>res/css/treasure.css</file>
+        <file>res/css/treasuremap.css</file>
     </qresource>
     <qresource prefix="/images/blue">
         <file>res/images/blue/unchecked.png</file>
@@ -35,5 +41,14 @@
         <file>res/images/blue/blue_leftArrow_small.png</file>
         <file>res/images/blue/blue_rightArrow_small.png</file>
         <file>res/images/blue/blue_qtreeview_selected.png</file>
+    </qresource>
+    <qresource prefix="backgrounds">
+        <file>res/images/backgrounds/armada.png</file>
+        <file>res/images/backgrounds/ghostship.png</file>
+        <file>res/images/backgrounds/night.png</file>
+        <file>res/images/backgrounds/pirate.png</file>
+        <file>res/images/backgrounds/piratemap.png</file>
+        <file>res/images/backgrounds/treasure.png</file>
+        <file>res/images/backgrounds/treasuremap.png</file>
     </qresource>
 </RCC>

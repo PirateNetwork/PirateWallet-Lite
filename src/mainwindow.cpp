@@ -32,7 +32,7 @@ MainWindow::MainWindow(QWidget *parent) :
     }
     catch (...)
     {
-        theme_name = "default";
+        theme_name = "pirate";
     }
 
     this->slot_change_theme(theme_name);
@@ -53,15 +53,14 @@ MainWindow::MainWindow(QWidget *parent) :
     // Set up donate action
     QObject::connect(ui->actionDonate, &QAction::triggered, this, &MainWindow::donate);
 
-    // File a bug
-    QObject::connect(ui->actionFile_a_bug, &QAction::triggered, [=]() {
-        QDesktopServices::openUrl(QUrl("https://github.com/MrMLynch/PirateWallet-Lite/issues/new"));
-    });
-
-    // Set up discord and website actions
     QObject::connect(ui->actionDiscord, &QAction::triggered, this, &MainWindow::discord);
 
     QObject::connect(ui->actionWebsite, &QAction::triggered, this, &MainWindow::website);
+
+    // File a bug
+    QObject::connect(ui->actionFile_a_bug, &QAction::triggered, [=]() {
+        QDesktopServices::openUrl(QUrl("https://github.com/PirateNetwork/PirateWallet-Lite/issues/new"));
+    });
 
     // Set up check for updates action
     QObject::connect(ui->actionCheck_for_Updates, &QAction::triggered, [=] () {
@@ -74,12 +73,12 @@ MainWindow::MainWindow(QWidget *parent) :
         Recurring::getInstance()->showRecurringDialog(this);
     });
 
-    // Request zcash
+    // Request arrr
     QObject::connect(ui->actionRequest_zcash, &QAction::triggered, [=]() {
         RequestDialog::showRequestZcash(this);
     });
 
-    // Pay Zcash URI
+    // Pay Arrr URI
     QObject::connect(ui->actionPay_URI, &QAction::triggered, [=] () {
         payZcashURI();
     });
@@ -143,10 +142,20 @@ MainWindow::MainWindow(QWidget *parent) :
     // Initialize to the balances tab
     ui->tabWidget->setCurrentIndex(0);
 
+    //hide z-address readio button
+    ui->rdioZSAddr->setVisible(false);
 
-    // The pirated tab is hidden by default, and only later added in if the embedded zcashd is started
-    //zcashdtab = ui->tabWidget->widget(4);
-    //ui->tabWidget->removeTab(4);
+    //hide unneeded totals
+    ui->balConfirmed->setVisible(false);
+    ui->balUnconfirmed->setVisible(false);
+    ui->label_2->setVisible(false);
+    ui->label->setVisible(false);
+
+    // The zcashd tab is hidden by default, and only later added in if the embedded zcashd is started
+    zcashdtab = ui->tabWidget->widget(3);
+    ui->tabWidget->removeTab(3);
+
+    ui->menuApps->menuAction()->setVisible(false);
 
     setupSendTab();
     setupTransactionsTab();
@@ -209,6 +218,7 @@ void MainWindow::restoreSavedStates() {
     } else {
         ui->balancesTable->horizontalHeader()->restoreState(balance_geom.toByteArray());
     }
+    ui->balancesTable->setAlternatingRowColors(true);
 
     auto tx_geom = s.value("tratablegeom");
     if (tx_geom == QVariant()) {
@@ -216,6 +226,7 @@ void MainWindow::restoreSavedStates() {
     } else {
         ui->transactionsTable->horizontalHeader()->restoreState(tx_geom.toByteArray());
     }
+    ui->transactionsTable->setAlternatingRowColors(true);
 }
 
 void MainWindow::doClose() {
@@ -401,6 +412,9 @@ void MainWindow::setupStatusBar() {
 
     statusIcon = new QLabel();
     ui->statusBar->addPermanentWidget(statusIcon);
+
+    syncingLabel = new QLabel();
+    ui->statusBar->addPermanentWidget(syncingLabel);
 }
 
 void MainWindow::setupSettingsModal() {
@@ -411,6 +425,11 @@ void MainWindow::setupSettingsModal() {
         settings.setupUi(&settingsDialog);
         Settings::saveRestore(&settingsDialog);
 
+        //Refresh wallet on accpeting setting changes.
+        connect(settings.buttonBox, &QDialogButtonBox::accepted, [=]{
+            this->rpc->refresh(true);
+        });
+
         // Setup theme combo
         int theme_index = settings.comboBoxTheme->findText(Settings::getInstance()->get_theme_name(), Qt::MatchExactly);
         settings.comboBoxTheme->setCurrentIndex(theme_index);
@@ -418,7 +437,7 @@ void MainWindow::setupSettingsModal() {
         QObject::connect(settings.comboBoxTheme, &QComboBox::currentTextChanged, [=] (QString theme_name) {
             this->slot_change_theme(theme_name);
             // Tell the user to restart
-            QMessageBox::information(this, tr("Restart"), tr("Please restart PirateWallet to have the theme apply"), QMessageBox::Ok);
+            //QMessageBox::information(this, tr("Restart"), tr("Please restart ZerWallet to have the theme apply"), QMessageBox::Ok);
         });
 
         // Check for updates
@@ -426,6 +445,12 @@ void MainWindow::setupSettingsModal() {
 
         // Fetch prices
         settings.chkFetchPrices->setChecked(Settings::getInstance()->getAllowFetchPrices());
+
+        // Show Tx Fees
+        settings.chkShowTxFee->setChecked(Settings::getInstance()->getShowTxFee());
+
+        // Show Change Transactions
+        settings.chkShowChangeTxns->setChecked(Settings::getInstance()->getShowChangeTxns());
 
         // List of default servers
         settings.cmbServer->addItem("https://lightd.pirate.black:443");
@@ -443,6 +468,12 @@ void MainWindow::setupSettingsModal() {
 
             // Allow fetching prices
             Settings::getInstance()->setAllowFetchPrices(settings.chkFetchPrices->isChecked());
+
+            // Allow fetching prices
+            Settings::getInstance()->setShowTxFee(settings.chkShowTxFee->isChecked());
+
+            // Allow fetching prices
+            Settings::getInstance()->setShowChangeTxns(settings.chkShowChangeTxns->isChecked());
 
             // Save the server
             bool reloadConnection = false;
@@ -572,6 +603,8 @@ bool MainWindow::eventFilter(QObject *object, QEvent *event) {
 // the transaction.
 void MainWindow::payZcashURI(QString uri, QString myAddr) {
     // If the Payments UI is not ready (i.e, all balances have not loaded), defer the payment URI
+    Q_UNUSED(myAddr);
+
     if (!isPaymentsReady()) {
         qDebug() << "Payment UI not ready, waiting for UI to pay URI";
         pendingURIPayment = uri;
@@ -845,7 +878,7 @@ void MainWindow::setupBalancesTab() {
 }
 
 void MainWindow::setupZcashdTab() {
-    ui->zcashdlogo->setBasePixmap(QPixmap(":/img/res/piratedlogo.svg"));
+    ui->zcashdlogo->setPixmap(QPixmap(":img/res/logo.png"));
 }
 
 void MainWindow::setupTransactionsTab() {
@@ -1269,6 +1302,9 @@ void MainWindow::updateLabels() {
         addZAddrsToComboList(ui->rdioZSAddr->isChecked())(true);
     }
 
+    // Update the Send Tab
+    updateFromCombo();
+
     // Update the autocomplete
     updateLabelsAutoComplete();
 }
@@ -1285,8 +1321,12 @@ void MainWindow::slot_change_theme(const QString& theme_name)
     }
     catch (...)
     {
-        saved_theme_name = "default";
+        saved_theme_name = "pirate";
     }
+
+    QRegExp space("\\s");
+    saved_theme_name.remove(space);
+    saved_theme_name = saved_theme_name.toLower();
 
     QFile qFile(":/css/res/css/" + saved_theme_name +".css");
     if (qFile.open(QFile::ReadOnly))

@@ -5,5 +5,5 @@ Priority: optional
 Architecture: amd64
 Maintainer: Mr Lynch <mrlynch@protonmail.ch>
 Description: PirateWallet-Lite is a lightclient UI wallet for Pirate.
- PirateWallet-Lite is a lightclient UI wallet for Pirate. It comes with 
+ PirateWallet-Lite is a lightclient UI wallet for Pirate. It comes with
  full support for shielded addresses and memos for Pirate.

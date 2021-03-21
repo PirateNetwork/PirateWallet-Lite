@@ -1,0 +1,14 @@
+[package]
+name = "qtlib"
+version = "0.2.0"
+authors = ["MrLynch", "Forge"]
+edition = "2018"
+
+[lib]
+name = "zecwalletlite"
+crate-type = ["staticlib"]
+
+[dependencies]
+libc = "0.2.58"
+lazy_static = "1.4.0"
+zecwalletlitelib = { git="https://github.com/piratenetwork/piratewallet-light-cli", rev="5a7848381e93d4874375bddc7117efb73678b94e" }

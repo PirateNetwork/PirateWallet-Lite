@@ -104,7 +104,7 @@ echo "[OK]"
 # xcrun altool --notarize-app -t osx -f macOS-zecwallet-lite-v1.0.0.dmg --primary-bundle-id="com.yourcompany.zecwallet-lite" -u "apple developer id@email.com" -p "one time password"
 # xcrun altool --notarization-info <output from pervious command> -u "apple developer id@email.com" -p "one time password"
 #...wait for the notarization to finish...
-# xcrun stapler staple macOS-zecwallet-lite-v1.0.0.dmg
+# xcrun stapler staple macOS-zerwallet-lite-v1.0.0.dmg
 
 echo -n "Building dmg..........."
 mv piratewallet-lite.app PirateWallet-Lite.app

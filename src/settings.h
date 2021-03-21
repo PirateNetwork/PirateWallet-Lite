@@ -33,10 +33,10 @@ public:
 
     bool    isTestnet();
     void    setTestnet(bool isTestnet);
-            
+
     bool    isSaplingAddress(QString addr);
     bool    isSproutAddress(QString addr);
-            
+
     bool    isValidSaplingPrivateKey(QString pk);
 
     bool    isSyncing();
@@ -44,7 +44,7 @@ public:
 
     QString getZcashdVersion();
     void    setZcashdVersion(QString version);
-    
+
     void    setUseEmbedded(bool r) { _useEmbedded = r; }
     bool    useEmbedded() { return _useEmbedded; }
 
@@ -53,12 +53,18 @@ public:
 
     int     getBlockNumber();
     void    setBlockNumber(int number);
-            
+
     bool    getAllowFetchPrices();
     void    setAllowFetchPrices(bool allow);
 
     bool    getCheckForUpdates();
     void    setCheckForUpdates(bool allow);
+
+    bool    getShowTxFee();
+    void    setShowTxFee(bool allow);
+
+    bool    getShowChangeTxns();
+    void    setShowChangeTxns(bool allow);
 
     QString get_theme_name();
     void set_theme_name(QString theme_name);
@@ -70,7 +76,7 @@ public:
 
     // Static stuff
     static const QString txidStatusMessage;
-    
+
     static void saveRestore(QDialog* d);
     static void saveRestoreTableHeader(QTableView* table, QDialog* d, QString tablename) ;
 
@@ -92,7 +98,7 @@ public:
     static int     getMaxMobileAppTxns() { return 30; }
 
     static int     getNumberOfDecimalPlaces() {return 8;}
-    
+
     static bool    isValidAddress(QString addr);
 
     static QString getDefaultChainName() { return QString("main"); }
@@ -116,13 +122,13 @@ private:
     QString _zcashdVersion    = 0;
     bool    _useEmbedded      = false;
     bool    _headless         = false;
-    
+
     double  zecPrice          = 0.0;
 };
 
 
 inline bool isJsonResultSuccess(const json& res) {
-    return res.find("result") != res.end() && 
+    return res.find("result") != res.end() &&
                     QString::fromStdString(res["result"].get<json::string_t>()) == "success";
 }
 

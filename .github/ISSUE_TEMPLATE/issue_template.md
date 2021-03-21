@@ -7,7 +7,7 @@ assignees: ''
 
 ---
 
-Please make sure you have the latest PirateWallet-Lite. 
+Please make sure you have the latest PirateWallet-Lite.
 
 **Describe the bug**
 A clear and concise description of what the bug is.

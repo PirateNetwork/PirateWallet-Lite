@@ -39,22 +39,22 @@ void RequestDialog::setupDialog(MainWindow* main, QDialog* d, Ui_RequestDialog* 
     }
     req->cmbMyAddress->setCurrentText(main->getRPC()->getDefaultSaplingAddress());
 
-    QIcon icon(":/icons/res/paymentreq.svg");
-    req->lblPixmap->setPixmap(icon.pixmap(48, 48));
+    QPixmap icon(":img/res/logo.png");
+    req->lblPixmap->setPixmap(icon.scaled(48, 48, Qt::KeepAspectRatio, Qt::SmoothTransformation));
 }
 
 // Static method that shows an incoming payment request and prompts the user to pay it
 void RequestDialog::showPaymentConfirmation(MainWindow* main, QString paymentURI) {
     PaymentURI payInfo = Settings::parseURI(paymentURI);
     if (!payInfo.error.isEmpty()) {
-        QMessageBox::critical(main, tr("Error paying pirate URI"), 
+        QMessageBox::critical(main, tr("Error paying pirate URI"),
                 tr("URI should be of the form 'pirate:<addr>?amt=x&memo=y") + "\n" + payInfo.error);
         return;
     }
 
     QDialog d(main);
     Ui_RequestDialog req;
-    setupDialog(main, &d, &req);    
+    setupDialog(main, &d, &req);
 
     // In the view mode, all fields are read-only
     req.txtAmount->setReadOnly(true);
@@ -132,7 +132,7 @@ void RequestDialog::showRequestZcash(MainWindow* main) {
                     + "?amt=" + amount.toDecimalString()
                     + "&memo=" + QUrl::toPercentEncoding(req.txtMemo->toPlainText());
 
-        QString sendURI = "pirate:" + AddressBook::addressFromAddressLabel(req.txtFrom->text()) 
+        QString sendURI = "pirate:" + AddressBook::addressFromAddressLabel(req.txtFrom->text())
                     + "?amt=0.0001"
                     + "&memo=" + QUrl::toPercentEncoding(memoURI);
 

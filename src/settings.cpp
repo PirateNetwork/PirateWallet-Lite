@@ -4,8 +4,8 @@
 
 Settings* Settings::instance = nullptr;
 
-Settings* Settings::init() {    
-    if (instance == nullptr) 
+Settings* Settings::init() {
+    if (instance == nullptr)
         instance = new Settings();
 
     return instance;
@@ -16,9 +16,9 @@ Settings* Settings::getInstance() {
 }
 
 Config Settings::getSettings() {
-    // Load from the QT Settings. 
+    // Load from the QT Settings.
     QSettings s;
-    
+
     auto server        = s.value("connection/server").toString();
     if (server.trimmed().isEmpty()) {
         server = Settings::getDefaultServer();
@@ -56,21 +56,21 @@ bool Settings::isSaplingAddress(QString addr) {
 bool Settings::isSproutAddress(QString addr) {
     if (!isValidAddress(addr))
         return false;
-        
+
     return isZAddress(addr) && !isSaplingAddress(addr);
 }
 
 bool Settings::isZAddress(QString addr) {
     if (!isValidAddress(addr))
         return false;
-        
+
     return addr.startsWith("z");
 }
 
 bool Settings::isTAddress(QString addr) {
     if (!isValidAddress(addr))
         return false;
-        
+
     return addr.startsWith("R");
 }
 
@@ -103,8 +103,8 @@ bool Settings::isSaplingActive() {
            (!isTestnet() && getBlockNumber() > 152855);
 }
 
-double Settings::getZECPrice() { 
-    return zecPrice; 
+double Settings::getZECPrice() {
+    return zecPrice;
 }
 
 bool Settings::getCheckForUpdates() {
@@ -122,6 +122,25 @@ bool Settings::getAllowFetchPrices() {
 void Settings::setAllowFetchPrices(bool allow) {
      QSettings().setValue("options/allowfetchprices", allow);
 }
+
+bool Settings::getShowTxFee() {
+    return QSettings().value("options/showtxfee", true).toBool();
+}
+
+void Settings::setShowTxFee(bool allow) {
+     QSettings().setValue("options/showtxfee", allow);
+}
+
+bool Settings::getShowChangeTxns() {
+    return QSettings().value("options/showchangetxns", true).toBool();
+}
+
+void Settings::setShowChangeTxns(bool allow) {
+     QSettings().setValue("options/showchangetxns", allow);
+}
+
+
+
 
 QString Settings::get_theme_name() {
     // Load from the QT Settings.
@@ -190,10 +209,10 @@ QString Settings::getTokenName() {
 }
 
 QString Settings::getDonationAddr() {
-    if (Settings::getInstance()->isTestnet()) 
+    if (Settings::getInstance()->isTestnet())
             return "ztestsapling1wn6889vznyu42wzmkakl2effhllhpe4azhu696edg2x6me4kfsnmqwpglaxzs7tmqsq7kudemp5";
-    else 
-            return "zs18z8penezg0dtqpuunwflt4auwam4pyeutgssm3udsame8tgh9lye9fynld89jshekdkevphzxsl";
+    else
+            return "zs1tedkn4gz0gw3lpnt5m6fhvkwklyl2asfsfxxkr8ptysycz7vnew555ma7s8hxv64nk4kgzk9lmp";
 
 }
 
@@ -217,7 +236,7 @@ bool Settings::isValidAddress(QString addr) {
     QRegExp ztsexp("^ztestsapling[a-z0-9]{76}", Qt::CaseInsensitive);
     QRegExp texp("^R[a-z0-9]{33}$", Qt::CaseInsensitive);
 
-    //return  zcexp.exactMatch(addr)  || texp.exactMatch(addr) || 
+    //return  zcexp.exactMatch(addr)  || texp.exactMatch(addr) ||
     return  texp.exactMatch(addr) ||
             ztsexp.exactMatch(addr) || zsexp.exactMatch(addr);
 }
@@ -225,7 +244,7 @@ bool Settings::isValidAddress(QString addr) {
 // Get a pretty string representation of this Payment URI
 QString Settings::paymentURIPretty(PaymentURI uri) {
     CAmount amount = CAmount::fromDecimalString(uri.amt);
-    return QString() + "Payment Request\n" + "Pay: " + uri.addr + "\nAmount: " + amount.toDecimalZECString() 
+    return QString() + "Payment Request\n" + "Pay: " + uri.addr + "\nAmount: " + amount.toDecimalZECString()
         + "\nMemo:" + QUrl::fromPercentEncoding(uri.memo.toUtf8());
 }
 
@@ -239,7 +258,7 @@ PaymentURI Settings::parseURI(QString uri) {
     }
 
     uri = uri.right(uri.length() - QString("pirate:").length());
-    
+
     QRegExp re("([a-zA-Z0-9]+)");
     int pos;
     if ( (pos = re.indexIn(uri)) == -1 ) {

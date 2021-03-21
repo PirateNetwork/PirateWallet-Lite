@@ -1,0 +1,221 @@
+QWidget, QTabWidget, QTabWidget::pane, QTabBar::tab, QGroupBox, QLabel
+{
+    background: transparent;
+    color: #ffffff;
+}
+
+dialog-ok-icon {
+	background-color: rgb(255, 0, 0);
+}
+
+QMainWindow
+{
+    border-image: url(':backgrounds/res/images/backgrounds/ghostship.png') 0 0 0 0 stretch stretch;
+    color: #ffffff;
+}
+
+QDialog
+{
+    background-color: rgb(32, 32, 32);
+}
+
+QMenuBar {
+	color: rgb(255, 255, 255);
+	background-color: rgba(0, 0, 0, 128);
+	spacing: 25px;
+}
+
+QMenuBar::item {
+	padding: 5px;
+}
+
+QMenuBar::item:selected {
+	background-color: rgb(0, 0, 0);
+	border: 1px solid rgb(215, 215, 215);
+}
+
+QMenu {
+	/*background-color: rgba(255, 0, 0, 128);*/
+	background-color: rgb(32, 32, 32);
+	border: 1px solid rgb(215, 215, 215);
+}
+
+QMenu::item {
+    padding: 10px;
+    border: 1px solid transparent; /* reserve space for selection border */
+}
+
+QMenu::item:disabled {
+    color: rgb(128, 128, 128);
+}
+
+QMenu::item:selected { /* when user selects item using mouse or keyboard */
+    background-color: rgb(64, 64, 64);
+    border: 1px solid rgb(128, 128, 128);
+}
+
+QTableView
+{
+    background-color: rgba(28, 28, 28, 128);
+    alternate-background-color: rgba(58, 58, 58, 128);
+    selection-background-color: rgba(28, 28, 28, 192);
+}
+
+
+QTableView::item {
+    color: #ffffff;
+    selection-color:rgb(193, 157, 66);
+}
+
+QTabWidget::pane {
+    background-color: rgba(0, 0, 0, 128);
+    border: 1px solid rgb(0, 0, 0);
+}
+
+QTabBar::tab {
+    background-color: rgba(64, 64, 64, 192);
+    min-width: 150px;
+    padding: 4px;
+    border-bottom: 1px solid rgb(0, 0, 0);
+    border-top-left-radius: 4px;
+    border-top-right-radius: 4px;
+}
+
+QTabBar::tab:selected {
+    background-color: rgba(128, 128, 128, 192);
+    font: bold;
+    border: 1px solid rgb(0, 0, 0);
+    border-bottom: none;
+}
+
+QTabBar::tab:hover {
+    font: bold;
+}
+
+QGroupBox {
+    background-color: rgba(0, 0, 0, 64);
+}
+
+QTextEdit {
+  color: white;
+}
+
+QLineEdit, QPlainTextEdit {
+    color: white;
+    background-color: rgba(48, 48, 48, 192);
+	  min-width: 100px;
+    border: 1px rgb(128, 128, 128);
+    border-radius: 4px;
+    padding:5px;
+}
+
+QLineEdit[text=""] {
+    color: white;
+}
+
+QPlainTextEdit[text=""] {
+    color: white;
+}
+
+QLineEdit:focus, QPlainTextEdit:focus  {
+    border: 1px solid rgb(215, 215, 215);
+}
+
+QLineEdit:hover, QPlainTextEdit:hover  {
+    border: 1px solid rgb(215, 215, 215);
+}
+
+QLineEdit:disabled, QPlainTextEdit:disabled  {
+    border: 1px solid rgb(64, 64, 64);
+}
+
+QPushButton {
+    color: rgb(32, 32, 32);
+    background-color: rgb(192, 192, 192);
+	  min-width: 100px;
+    border: 1px rgb(128, 128, 128);
+    border-radius: 4px;
+    padding:5px;
+}
+
+QComboBox {
+    color: rgb(255, 255, 255);
+    background-color: rgba(48, 48, 48, 192);
+    min-height: 28px;
+	  min-width: 80px;
+    border: 1px rgb(108, 108, 108);
+    border-radius: 4px;
+}
+
+QComboBox:hover {
+    border: 1px solid rgb(215, 215, 215);
+}
+
+QComboBox QAbstractItemView {
+    background-color: rgb(0, 0, 0);
+    border: 1px solid rgb(215, 215, 215);
+    border-radius: 4px;
+}
+
+QComboBox::item {
+    background-color: rgb(0, 0, 0);
+    border: 1px solid rgb(0, 0, 0);
+    border-radius: 4px;
+    height:28px;
+}
+
+QComboBox::item:selected { /* when user selects item using mouse or keyboard */
+    background-color: rgb(58, 58, 58);
+    border: 1px solid rgb(215, 215, 215);
+    border-radius: 4px;
+}
+
+QCheckBox::indicator, QRadioButton::indicator {
+  	border: 2px solid rgb(215, 215, 215);
+  	border-radius: 6px;
+}
+
+QCheckBox::indicator:checked, QRadioButton::indicator:checked {
+	 background-color: rgba(0, 255, 0, 128);
+}
+
+QCheckBox::indicator:unchecked, QRadioButton::indicator:unchecked {
+	 background-color: rgba(16, 15, 0, 128);
+}
+
+QCheckBox::indicator:hover, QRadioButton::indicator:hover {
+	 border: 2px solid rgb(192, 192, 192);
+}
+
+QCheckBox::indicator:disabled, QRadioButton::indicator:disabled {
+	 border: 2px solid rgb(64, 64, 64);
+}
+
+QDialogButtonBox {
+    dialogbuttonbox-buttons-have-icons: true;
+    dialog-ok-icon: url(':icons/res/images/icons/tick.png');
+    dialog-cancel-icon: url(':icons/res/images/icons/close.png');
+}
+
+QHeaderView::section {
+    background-color: rgba(48,48,48,1);
+    color: #ffffff;
+}
+
+QStatusBar {
+    background: rgb(32, 32, 32);
+}
+
+QScrollBar::vertical {
+  border: 1px solid rgb(0,0,0);
+  background: rgb(58, 58, 58);
+}
+
+QScrollBar::horizontal {
+  border: 1px solid rgb(0,0,0);
+  background: rgb(58, 58, 58);
+}
+
+QScrollBar::add-page:vertical, QScrollBar::sub-page:vertical, QScrollBar::add-page:horizontal, QScrollBar::sub-page:horizontal {
+    background: transparent;
+}

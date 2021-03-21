@@ -8,7 +8,7 @@
 struct UnspentOutput {
     QString address;
     QString txid;
-    CAmount amount;    
+    CAmount amount;
     int     blockCreated;
     bool    spendable;
     bool    pending;
@@ -34,22 +34,22 @@ public:
     const QList<UnspentOutput>       getUTXOs()             { QReadLocker locker(lock); return *utxos; }
     const QMap<QString, CAmount>     getAllBalances()       { QReadLocker locker(lock); return *balances; }
     const QMap<QString, bool>        getUsedAddresses()     { QReadLocker locker(lock); return *usedAddresses; }
-    
+
     CAmount                    getAvailableBalance()          { QReadLocker locker(lock); return availableBalance; }
     void                       setAvailableBalance(CAmount a) { QReadLocker locker(lock); this->availableBalance = a; }
 
     CAmount                    getBalZ()          { QReadLocker locker(lock); return balZ; }
     void                       setBalZ(CAmount a) { QReadLocker locker(lock); this->balZ = a; }
 
-    CAmount                    getBalVerified()          { QReadLocker locker(lock); return balVerified; }
-    void                       setBalVerified(CAmount a) { QReadLocker locker(lock); this->balVerified = a; }
+    // CAmount                    getBalVerified()          { QReadLocker locker(lock); return balVerified; }
+    // void                       setBalVerified(CAmount a) { QReadLocker locker(lock); this->balVerified = a; }
 
     CAmount                    getTotalPending()          { QReadLocker locker(lock); return totalPending; }
     void                       setTotalPending(CAmount a) { QReadLocker locker(lock); this->totalPending = a; }
 
     DataModel();
     ~DataModel();
-private: 
+private:
     int latestBlock;
 
     bool isEncrypted    = false;
@@ -64,7 +64,7 @@ private:
     CAmount                 totalPending;   // Outgoing pending is -ve
 
     CAmount                 balZ;
-    CAmount                 balVerified;
+    // CAmount                 balVerified;
 
     QReadWriteLock* lock;
 };

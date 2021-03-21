@@ -4,7 +4,7 @@ PirateWallet-Lite is z-Addr first, Sapling compatible wallet lightwallet for Pir
 - Fully encrypt your private keys, using viewkeys to sync the blockchain
 
 ## Download
-Download compiled binaries from our [release page](https://github.com/MrMLynch/piratewallet-lite/releases)
+Download compiled binaries from our [release page](https://github.com/Piratenetwork/piratewallet-lite/releases)
 
 ## Privacy
 * While all the keys and transaction detection happens on the client, the server can learn what blocks contain your shielded transactions.
@@ -25,7 +25,7 @@ PirateWallet-Lite does automatic note and utxo management, which means it doesn'
 ### Building on Linux
 
 ```
-git clone https://github.com/MrMLynch/piratewallet-lite.git
+git clone https://github.com/Piratenetwork/piratewallet-lite.git
 cd piratewallet-lite
 /path/to/qt5/bin/qmake piratewallet-lite.pro CONFIG+=debug
 make -j$(nproc)
