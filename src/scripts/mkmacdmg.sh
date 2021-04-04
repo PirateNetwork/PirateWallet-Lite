@@ -45,21 +45,6 @@ if [ -z $QT_PATH ]; then
     exit 1;
 fi
 
-if [ -z "$CERTIFICATE" ]; then
-    echo "CERTIFICATE is not set. Please set it the name of the MacOS developer certificate to sign the binary with";
-    exit 1;
-fi
-
-if [ -z "$APPLE_USERNAME" ]; then
-    echo "APPLE_USERNAME is not set. Please set it the name of the MacOS developer login email to submit the binary for Apple for notarization";
-    exit 1;
-fi
-
-if [ -z "$APPLE_PASSWORD" ]; then
-    echo "APPLE_PASSWORD is not set. Please set it the name of the MacOS developer Application password to submit the binary for Apple for notarization";
-    exit 1;
-fi
-
 if [ -z $APP_VERSION ]; then
     echo "APP_VERSION is not set. Please set it to the current release version of the app";
     exit 1;
@@ -85,6 +70,13 @@ QT_STATIC=$QT_PATH src/scripts/dotranslations.sh >/dev/null
 $QT_PATH/bin/qmake piratewallet-lite.pro CONFIG+=release >/dev/null
 echo "[OK]"
 
+printf "Building Sodium Library...............\n"
+printf "\n"
+./res/libsodium/build.sh > /dev/null
+
+printf "Building Rust Library...............\n"
+printf "\n"
+./res/libzecwalletlite/build.sh > /dev/null
 
 echo -n "Building..............."
 make -j4 >/dev/null
