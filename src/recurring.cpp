@@ -50,7 +50,7 @@ RecurringPaymentInfo RecurringPaymentInfo::fromJson(QJsonObject j) {
 QString RecurringPaymentInfo::getHash() const {
     auto val = getScheduleDescription() + fromAddr + toAddr;
 
-    return QString(QCryptographicHash::hash(val.toUtf8(), 
+    return QString(QCryptographicHash::hash(val.toUtf8(),
                     QCryptographicHash::Sha256).toHex());
 }
 
@@ -102,11 +102,11 @@ QDateTime RecurringPaymentInfo::getNextPayment() const {
     }
 
     return QDateTime::fromSecsSinceEpoch(0);
-} 
+}
 
 /**
  * Counts the number of payments that haven't been started yet
- */ 
+ */
 int RecurringPaymentInfo::getNumPendingPayments() const {
     int count = 0;
     for (auto item : payments) {
@@ -118,7 +118,7 @@ int RecurringPaymentInfo::getNumPendingPayments() const {
     return count;
 }
 
-// Returns a new Recurring payment info, created from the Tx. 
+// Returns a new Recurring payment info, created from the Tx.
 // The caller needs to take ownership of the returned object.
 RecurringPaymentInfo* Recurring::getNewRecurringFromTx(QWidget* parent, MainWindow*, Tx tx, RecurringPaymentInfo* rpi) {
     Ui_newRecurringDialog ui;
@@ -173,24 +173,24 @@ RecurringPaymentInfo* Recurring::getNewRecurringFromTx(QWidget* parent, MainWind
         ui.txtDesc->setText(rpi->desc);
         ui.lblTo->setText(rpi->toAddr);
         ui.txtMemo->setPlainText(rpi->memo);
-        
+
         ui.cmbCurrency->setCurrentText(rpi->currency);
-        ui.lblAmt->setText(rpi->getAmountPretty()); 
+        ui.lblAmt->setText(rpi->getAmountPretty());
         ui.lblFrom->setText(rpi->fromAddr);
         ui.txtNumPayments->setText(QString::number(rpi->payments.size()));
         ui.cmbSchedule->setCurrentIndex(rpi->schedule - 1); // indexes start from 0
     }
-    
+
     ui.txtDesc->setFocus();
     if (d.exec() == QDialog::Accepted) {
         // Construct a new Object and return it
         auto numPayments = ui.txtNumPayments->text().toInt();
         auto r = new RecurringPaymentInfo(numPayments);
         r->desc = ui.txtDesc->text();
-        r->currency = ui.cmbCurrency->currentText();        
+        r->currency = ui.cmbCurrency->currentText();
         r->schedule = (Schedule)ui.cmbSchedule->currentData().toInt();
         r->startDate = QDateTime::currentDateTime();
-        
+
         updateInfoWithTx(r, tx);
         return r;
     }
@@ -227,7 +227,7 @@ void Recurring::updateInfoWithTx(RecurringPaymentInfo* r, Tx tx) {
 /**
  * Given a schedule and an optional previous date, calculate the next payment date/
  * If there is no previous date, it is assumed to be the current DateTime
- */ 
+ */
 QDateTime Recurring::getNextPaymentDate(Schedule s, QDateTime start) {
     QDateTime nextDate = start;
 
@@ -262,9 +262,9 @@ void Recurring::addRecurringInfo(const RecurringPaymentInfo& rpi) {
     if (payments.contains(rpi.getHash())) {
         payments.remove(rpi.getHash());
     }
-    
+
     payments.insert(rpi.getHash(), rpi);
-    
+
     writeToStorage();
 }
 
@@ -273,9 +273,9 @@ void Recurring::removeRecurringInfo(QString hash) {
         qDebug() << "Hash not found:" << hash << " in " << payments.keys();
         return;
     }
-    
+
     payments.remove(hash);
-    
+
     writeToStorage();
 }
 
@@ -305,7 +305,7 @@ void Recurring::writeToStorage() {
         arr.append(v.toJson());
     }
 
-    QTextStream out(&file);   
+    QTextStream out(&file);
     out << QJsonDocument(arr).toJson();
 
     file.close();
@@ -315,7 +315,7 @@ void Recurring::writeToStorage() {
  * Lookup the recurring payment info with the given hash, and update
  * a payment made
  **/
-bool Recurring::updatePaymentItem(QString hash, int paymentNumber, 
+bool Recurring::updatePaymentItem(QString hash, int paymentNumber,
                     QString txid, QString err, PaymentStatus status) {
     if (!payments.contains(hash)) {
         return false;
@@ -336,12 +336,12 @@ bool Recurring::updatePaymentItem(QString hash, int paymentNumber,
 }
 
 Recurring* Recurring::getInstance() {
-    if (!instance) { 
-        instance = new Recurring(); 
+    if (!instance) {
+        instance = new Recurring();
         instance->readFromStorage();
-    } 
-    
-    return instance; 
+    }
+
+    return instance;
 }
 
 // Singleton
@@ -364,7 +364,7 @@ void Recurring::processPending(MainWindow* main) {
         QList<RecurringPaymentInfo::PaymentItem> pending;
 
         for (auto pi: rpi.payments) {
-            if (pi.status == PaymentStatus::NOT_STARTED && 
+            if (pi.status == PaymentStatus::NOT_STARTED &&
                 pi.date <= QDateTime::currentDateTime()) {
                     pending.append(pi);
                 }
@@ -387,7 +387,7 @@ void Recurring::processPending(MainWindow* main) {
 /**
  * Called when a particular RecurringPaymentInfo has more than one pending payment to be processed.
  * We will ask the user what he wants to do.
- */ 
+ */
 void Recurring::processMultiplePending(RecurringPaymentInfo rpi, MainWindow* main) {
     Ui_RecurringPending ui;
     QDialog d(main);
@@ -401,7 +401,7 @@ void Recurring::processMultiplePending(RecurringPaymentInfo rpi, MainWindow* mai
 
     // Mark all the outstanding ones as pending, so it shows in the table correctly.
     for (auto& pi: rpi.payments) {
-        if (pi.status == PaymentStatus::NOT_STARTED && 
+        if (pi.status == PaymentStatus::NOT_STARTED &&
             pi.date <= QDateTime::currentDateTime()) {
                 pi.status = PaymentStatus::PENDING;
             }
@@ -457,7 +457,7 @@ void Recurring::processMultiplePending(RecurringPaymentInfo rpi, MainWindow* mai
     }
 
     // Save the table column layout
-    s.setValue("recurringmultipaymentstablevgeom", ui.tblPending->horizontalHeader()->saveState()); 
+    s.setValue("recurringmultipaymentstablevgeom", ui.tblPending->horizontalHeader()->saveState());
 }
 
 void Recurring::executeRecurringPayment(MainWindow* main, RecurringPaymentInfo rpi, QList<int> paymentNumbers) {
@@ -467,13 +467,13 @@ void Recurring::executeRecurringPayment(MainWindow* main, RecurringPaymentInfo r
         // If there is no price, then fail the payment
         if (Settings::getInstance()->getZECPrice() == 0) {
             for (auto paymentNumber: paymentNumbers) {
-                updatePaymentItem(rpi.getHash(), paymentNumber, 
+                updatePaymentItem(rpi.getHash(), paymentNumber,
                     "", QObject::tr("No ARRR price was available to convert from USD"),
                     PaymentStatus::ERROR);
             }
             return;
         }
-        
+
         // Translate it into ARRR
         amount = rpi.amt / Settings::getInstance()->getZECPrice();
     }
@@ -482,7 +482,7 @@ void Recurring::executeRecurringPayment(MainWindow* main, RecurringPaymentInfo r
     Tx tx;
     tx.fromAddr = rpi.fromAddr;
     tx.fee      = Settings::getMinerFee();
-    
+
     // If this is a multiple payment, we'll add up all the amounts
     if (paymentNumbers.size() > 1)
         amount *= paymentNumbers.size();
@@ -490,11 +490,11 @@ void Recurring::executeRecurringPayment(MainWindow* main, RecurringPaymentInfo r
     tx.toAddrs.append(ToFields { rpi.toAddr, CAmount::fromDouble(amount), rpi.memo });
 
     // To prevent some weird race conditions, we immediately mark the payment as paid.
-    // If something goes wrong, we'll get the error callback below, and the status will be 
+    // If something goes wrong, we'll get the error callback below, and the status will be
     // updated. If it succeeds, we'll once again update the status with the txid
     for (int paymentNumber: paymentNumbers) {
         updatePaymentItem(rpi.getHash(), paymentNumber, "", "", PaymentStatus::COMPLETED);
-    }            
+    }
 
     // Send it off to the RPC
     doSendTx(main, tx, [=] (QString txid, QString err) {
@@ -502,7 +502,7 @@ void Recurring::executeRecurringPayment(MainWindow* main, RecurringPaymentInfo r
             // Success, update the rpi
             for (int paymentNumber: paymentNumbers) {
                 updatePaymentItem(rpi.getHash(), paymentNumber, txid, "", PaymentStatus::COMPLETED);
-            }            
+            }
         } else {
             // Errored out. Bummer.
             for (int paymentNumber: paymentNumbers) {
@@ -514,10 +514,10 @@ void Recurring::executeRecurringPayment(MainWindow* main, RecurringPaymentInfo r
 
 /**
  * Execute a send Tx
- */ 
+ */
 void Recurring::doSendTx(MainWindow* mainwindow, Tx tx, std::function<void(QString, QString)> cb) {
-    mainwindow->getRPC()->executeTransaction(tx, 
-        [=] (QString txid) { 
+    mainwindow->getRPC()->executeTransaction(tx,
+        [=] (QString txid) {
             mainwindow->ui->statusBar->showMessage(Settings::txidStatusMessage + " " + txid);
             cb(txid, "");
         },
@@ -525,12 +525,12 @@ void Recurring::doSendTx(MainWindow* mainwindow, Tx tx, std::function<void(QStri
             mainwindow->ui->statusBar->showMessage(QObject::tr(" Tx ") % opid % QObject::tr(" failed"), 15 * 1000);
             cb("", errStr);
         });
-    
+
 }
 
 /**
  * Show the list of configured recurring payments
- */ 
+ */
 void Recurring::showRecurringDialog(MainWindow* parent) {
     // Make sure only 1 is showing at a time
     static bool isDialogOpen = false;
@@ -540,7 +540,7 @@ void Recurring::showRecurringDialog(MainWindow* parent) {
 
     Ui_RecurringDialog rd;
     QDialog d(parent);
-    
+
     rd.setupUi(&d);
     Settings::saveRestore(&d);
 
@@ -596,11 +596,11 @@ void Recurring::showRecurringDialog(MainWindow* parent) {
         // Restore the table column layout
         QSettings s;
         p.tableView->horizontalHeader()->restoreState(s.value("recurringpaymentstablevgeom").toByteArray());
-    
+
         pd.exec();
 
         // Save the table column layout
-        s.setValue("recurringpaymentstablevgeom", p.tableView->horizontalHeader()->saveState()); 
+        s.setValue("recurringpaymentstablevgeom", p.tableView->horizontalHeader()->saveState());
     };
 
     // View Button
@@ -608,14 +608,14 @@ void Recurring::showRecurringDialog(MainWindow* parent) {
         auto selectedRows = rd.tableView->selectionModel()->selectedRows();
         if (selectedRows.size() == 1) {
             auto rpi = Recurring::getInstance()->getAsList()[selectedRows[0].row()];
-            showPayments(rpi);               
+            showPayments(rpi);
         }
     });
 
     // Double Click
     QObject::connect(rd.tableView, &QTableView::doubleClicked, [=] (auto index) {
         auto rpi = Recurring::getInstance()->getAsList()[index.row()];
-        showPayments(rpi);           
+        showPayments(rpi);
     });
 
     // Delete button
@@ -623,8 +623,8 @@ void Recurring::showRecurringDialog(MainWindow* parent) {
         auto selectedRows = rd.tableView->selectionModel()->selectedRows();
         if (selectedRows.size() == 1) {
             auto rpi = Recurring::getInstance()->getAsList()[selectedRows[0].row()];
-            if (QMessageBox::warning(&d, QObject::tr("Are you sure you want to delete the recurring payment?"), 
-                QObject::tr("Are you sure you want to delete the recurring payment?") + "\n" + 
+            if (QMessageBox::warning(&d, QObject::tr("Are you sure you want to delete the recurring payment?"),
+                QObject::tr("Are you sure you want to delete the recurring payment?") + "\n" +
                 QObject::tr("All future payments will be cancelled."),
                 QMessageBox::Yes, QMessageBox::No) == QMessageBox::Yes) {
                     Recurring::getInstance()->removeRecurringInfo(rpi.getHash());
@@ -644,10 +644,10 @@ void Recurring::showRecurringDialog(MainWindow* parent) {
 
 /**
  * Model for  List of recurring payments
- */ 
+ */
 RecurringListViewModel::RecurringListViewModel(QTableView* parent) {
     this->parent = parent;
-    headers << tr("Amount") << tr("Schedule") << tr("Payments Left") 
+    headers << tr("Amount") << tr("Schedule") << tr("Payments Left")
             << tr("Next Payment") << tr("To");
 }
 
@@ -667,11 +667,11 @@ QVariant RecurringListViewModel::data(const QModelIndex &index, int role) const 
         case 0: return rpi.getAmountPretty();
         case 1: return tr("Every ") + schedule_desc(rpi.schedule);
         case 2: return QString::number(rpi.getNumPendingPayments()) + " of " + QString::number(rpi.payments.size());
-        case 3: { 
+        case 3: {
             auto n = rpi.getNextPayment();
             if (n.toSecsSinceEpoch() == 0) return tr("None"); else return n;
         }
-        case 4: return rpi.toAddr;        
+        case 4: return rpi.toAddr;
         }
     }
 
@@ -750,4 +750,4 @@ QVariant RecurringPaymentsListViewModel::headerData(int section, Qt::Orientation
     }
 
     return QVariant();
-} 
+}

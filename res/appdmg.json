@@ -2,7 +2,7 @@
   "title": "piratewallet-vRELEASE_VERSION",
   "icon": "logo.icns",
   "background": "dmgbg.png",
-  "window" : { 
+  "window" : {
     "size" : { "width" : 600, "height" : 100},
     "position" : { "x" : 200, "y" : 200}
   },

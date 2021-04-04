@@ -7,7 +7,7 @@
 
 #include "version.h"
 
-class SignalHandler 
+class SignalHandler
 {
 public:
     SignalHandler(int mask = DEFAULT_SIGNALS);
@@ -100,7 +100,7 @@ int POSIX_logicalToPhysical(int signal)
     // bind it to a SIGTERM. Anyway the signal will never be raised
     case SignalHandler::SIG_CLOSE: return SIGTERM;
     case SignalHandler::SIG_RELOAD: return SIGHUP;
-    default: 
+    default:
         return -1; // SIG_ERR = -1
     }
 }
@@ -143,6 +143,8 @@ public:
         QCoreApplication::setAttribute(Qt::AA_UseHighDpiPixmaps);
         QCoreApplication::setAttribute(Qt::AA_EnableHighDpiScaling);
 
+        QApplication::setStyle("fusion");
+        
         SingleApplication a(argc, argv, true);
 
         // Command line parser
@@ -158,11 +160,11 @@ public:
         // Check for a positional argument indicating a pirate payment URI
         if (a.isSecondary()) {
             if (parser.positionalArguments().length() > 0) {
-                a.sendMessage(parser.positionalArguments()[0].toUtf8());    
+                a.sendMessage(parser.positionalArguments()[0].toUtf8());
             }
             a.exit( 0 );
-            return 0;            
-        } 
+            return 0;
+        }
 
         QCoreApplication::setOrganizationName("PirateChain");
         QCoreApplication::setApplicationName("piratewallet");
@@ -170,7 +172,7 @@ public:
         QString locale = QLocale::system().name();
         locale.truncate(locale.lastIndexOf('_'));   // Get the language code
         qDebug() << "Loading locale " << locale;
-        
+
         QTranslator translator;
         translator.load(QString(":/translations/res/arrr_qt_wallet_") + locale);
         a.installTranslator(&translator);
@@ -187,7 +189,7 @@ public:
     #if (QT_VERSION >= QT_VERSION_CHECK(5, 10, 0))
         unsigned int seed = QRandomGenerator::securelySeeded().generate();
     #else
-        // This will be used only during debugging for compatibility reasons 
+        // This will be used only during debugging for compatibility reasons
         unsigned int seed = std::time(0);
     #endif
         std::srand(seed);
@@ -202,7 +204,7 @@ public:
         }
 
         Settings::getInstance()->setUseEmbedded(false);
-        
+
 
         w = new MainWindow();
         w->setWindowTitle("PirateWallet Lightclient v" + QString(APP_VERSION));
@@ -217,8 +219,8 @@ public:
             QString uri(msg);
 
             // We need to execute this async, otherwise the app seems to crash for some reason.
-            QTimer::singleShot(1, [=]() { w->payZcashURI(uri); });            
-        });   
+            QTimer::singleShot(1, [=]() { w->payZcashURI(uri); });
+        });
 
         // For MacOS, we have an event filter
         a.installEventFilter(w);
@@ -226,7 +228,7 @@ public:
         // Check if starting headless
         Settings::getInstance()->setHeadless(false);
         w->show();
-        
+
         return QApplication::exec();
     }
 
@@ -248,17 +250,17 @@ public:
     bool handleSignal(int signal)
     {
         std::cout << std::endl << "Interrupted with signal " << signal << std::endl;
-        
-        if (w && w->getRPC()) {            
+
+        if (w && w->getRPC()) {
             // Blocking call to closeEvent on the UI thread.
-            DispatchToMainThread([=] { 
-                w->doClose(); 
+            DispatchToMainThread([=] {
+                w->doClose();
                 QApplication::quit();
             });
         } else {
             QApplication::quit();
         }
-        
+
         return true;
     }
 
@@ -271,4 +273,3 @@ int main(int argc, char* argv[])
     Application app;
     return app.main(argc, argv);
 }
-

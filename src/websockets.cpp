@@ -101,7 +101,7 @@ WormholeClient::~WormholeClient() {
 
     if (timer)
         timer->stop();
-        
+
     delete timer;
 }
 
@@ -116,7 +116,7 @@ void WormholeClient::connect() {
     //m_webSocket->open(QUrl("ws://127.0.0.1:7070"));
 }
 
-void WormholeClient::retryConnect() {    
+void WormholeClient::retryConnect() {
     QTimer::singleShot(5 * 1000 * pow(2, retryCount), [=]() {
         if (retryCount < 10) {
             qDebug() << "Retrying websocket connection";
@@ -129,7 +129,7 @@ void WormholeClient::retryConnect() {
     });
 }
 
-// Called when the websocket is closed. If this was closed without our explicitly closing it, 
+// Called when the websocket is closed. If this was closed without our explicitly closing it,
 // then we need to try and reconnect
 void WormholeClient::closed() {
     if (!shuttingDown) {
@@ -151,7 +151,7 @@ void WormholeClient::onConnected()
 
     m_webSocket->sendTextMessage(payload);
 
-    // On connected, we'll also create a timer to ping it every 4 minutes, since the websocket 
+    // On connected, we'll also create a timer to ping it every 4 minutes, since the websocket
     // will timeout after 5 minutes
     timer = new QTimer(parent);
     QObject::connect(timer, &QTimer::timeout, [=]() {
@@ -174,11 +174,11 @@ void WormholeClient::onTextMessageReceived(QString message)
 // ==============================
 // AppDataServer
 // ==============================
-AppDataServer* AppDataServer::instance = nullptr; 
+AppDataServer* AppDataServer::instance = nullptr;
 
 QString AppDataServer::getWormholeCode(QString secretHex) {
     unsigned char* secret = new unsigned char[crypto_secretbox_KEYBYTES];
-    sodium_hex2bin(secret, crypto_secretbox_KEYBYTES, secretHex.toStdString().c_str(), crypto_secretbox_KEYBYTES*2, 
+    sodium_hex2bin(secret, crypto_secretbox_KEYBYTES, secretHex.toStdString().c_str(), crypto_secretbox_KEYBYTES*2,
         NULL, NULL, NULL);
 
     unsigned char* out1 = new unsigned char[crypto_hash_sha256_BYTES];
@@ -188,7 +188,7 @@ QString AppDataServer::getWormholeCode(QString secretHex) {
     crypto_hash_sha256(out2, out1, crypto_hash_sha256_BYTES);
 
     char* wmcode = new char[crypto_hash_sha256_BYTES*2 + 1];
-    sodium_bin2hex(wmcode, crypto_hash_sha256_BYTES*2 + 1, out2, crypto_hash_sha256_BYTES);    
+    sodium_bin2hex(wmcode, crypto_hash_sha256_BYTES*2 + 1, out2, crypto_hash_sha256_BYTES);
 
     QString wmcodehex(wmcode);
 
@@ -246,7 +246,7 @@ QString AppDataServer::getConnectedName() {
 }
 
 bool AppDataServer::isAppConnected() {
-    return !getConnectedName().isEmpty() && 
+    return !getConnectedName().isEmpty() &&
         getLastSeenTime().daysTo(QDateTime::currentDateTime()) < 14;
 }
 
@@ -265,7 +265,7 @@ void AppDataServer::connectAppDialog(MainWindow* parent) {
 
         updateConnectedUI();
     });
-    
+
     QObject::connect(ui->txtConnStr, &QLineEdit::cursorPositionChanged, [=](int, int) {
         ui->txtConnStr->selectAll();
     });
@@ -295,7 +295,7 @@ void AppDataServer::connectAppDialog(MainWindow* parent) {
 
     // Cleanup
     tempSecret = "";
-    
+
     delete tempWormholeClient;
     tempWormholeClient = nullptr;
 
@@ -319,7 +319,7 @@ void AppDataServer::updateUIWithNewQRCode(MainWindow* mainwindow) {
 
     if (ipv4Addr.isEmpty())
         return;
-    
+
     QString uri = "ws://" + ipv4Addr + ":8877";
 
     // Get a new secret
@@ -422,7 +422,7 @@ QString AppDataServer::encryptOutgoing(QString msg) {
     saveNonceHex(NonceType::LOCAL, QString(newLocalNonce));
 
     unsigned char* secret = new unsigned char[crypto_secretbox_KEYBYTES];
-    sodium_hex2bin(secret, crypto_secretbox_KEYBYTES, getSecretHex().toStdString().c_str(), crypto_secretbox_KEYBYTES*2, 
+    sodium_hex2bin(secret, crypto_secretbox_KEYBYTES, getSecretHex().toStdString().c_str(), crypto_secretbox_KEYBYTES*2,
         NULL, NULL, NULL);
 
     int msgSize = strlen(msg.toStdString().c_str());
@@ -431,7 +431,7 @@ QString AppDataServer::encryptOutgoing(QString msg) {
     crypto_secretbox_easy(encrpyted, (const unsigned char *)msg.toStdString().c_str(), msgSize, noncebin, secret);
 
     int encryptedHexSize = (msgSize + crypto_secretbox_MACBYTES) * 2 + 1;
-    char * encryptedHex = new char[encryptedHexSize];     
+    char * encryptedHex = new char[encryptedHexSize];
     sodium_memzero(encryptedHex, encryptedHexSize);
     sodium_bin2hex(encryptedHex, encryptedHexSize, encrpyted, msgSize + crypto_secretbox_MACBYTES);
 
@@ -440,7 +440,7 @@ QString AppDataServer::encryptOutgoing(QString msg) {
             {"payload", QString(encryptedHex)},
             {"to", getWormholeCode(getSecretHex())}
         });
-    
+
     delete[] noncebin;
     delete[] newLocalNonce;
     delete[] secret;
@@ -451,8 +451,8 @@ QString AppDataServer::encryptOutgoing(QString msg) {
 }
 
 /**
-  Attempt to decrypt a message. If the decryption fails, it returns the string "error", the decrypted message otherwise. 
-  It will use the given secret to attempt decryption. In addition, it will enforce that the nonce is greater than the last seen nonce, 
+  Attempt to decrypt a message. If the decryption fails, it returns the string "error", the decrypted message otherwise.
+  It will use the given secret to attempt decryption. In addition, it will enforce that the nonce is greater than the last seen nonce,
   unless the skipNonceCheck = true, which is used when attempting decrtption with a temp secret key.
 */
 QString AppDataServer::decryptMessage(QJsonDocument msg, QString secretHex, QString lastRemoteNonceHex) {
@@ -482,9 +482,9 @@ QString AppDataServer::decryptMessage(QJsonDocument msg, QString secretHex, QStr
         delete[] noncebin;
         return "error";
     }
-    
+
     unsigned char* secret = new unsigned char[crypto_secretbox_KEYBYTES];
-    sodium_hex2bin(secret, crypto_secretbox_KEYBYTES, secretHex.toStdString().c_str(), crypto_secretbox_KEYBYTES*2, 
+    sodium_hex2bin(secret, crypto_secretbox_KEYBYTES, secretHex.toStdString().c_str(), crypto_secretbox_KEYBYTES*2,
         NULL, NULL, NULL);
 
     unsigned char* encrypted = new unsigned char[encryptedhex.length() / 2];
@@ -497,7 +497,7 @@ QString AppDataServer::decryptMessage(QJsonDocument msg, QString secretHex, QStr
 
     QString payload;
     if (result == -1) {
-        payload = "error";        
+        payload = "error";
     } else {
         // Update the last seen remote hex
         saveNonceHex(NonceType::REMOTE, noncehex);
@@ -517,7 +517,7 @@ QString AppDataServer::decryptMessage(QJsonDocument msg, QString secretHex, QStr
     delete[] noncebin;
     delete[] encrypted;
     delete[] decrypted;
-    
+
     return payload;
 }
 
@@ -531,7 +531,7 @@ void AppDataServer::processMessage(QString message, MainWindow* mainWindow, std:
             pClient->sendTextMessage(r);
             return;
     };
-    
+
     // First, extract the command from the message
     auto msg = QJsonDocument::fromJson(message.toUtf8());
 
@@ -554,7 +554,7 @@ void AppDataServer::processMessage(QString message, MainWindow* mainWindow, std:
 
     auto decrypted = decryptMessage(msg, getSecretHex(), getNonceHex(NonceType::REMOTE));
 
-    // If the decryption failed, maybe this is a new connection, so see if the dialog is open and a 
+    // If the decryption failed, maybe this is a new connection, so see if the dialog is open and a
     // temp secret is in place
     if (decrypted == "error") {
         // If the dialog is open, then there might be a temporary, new secret key. Attempt to decrypt
@@ -604,7 +604,7 @@ void AppDataServer::processMessage(QString message, MainWindow* mainWindow, std:
     }
 }
 
-// Decrypted method will be executed here. 
+// Decrypted method will be executed here.
 void AppDataServer::processDecryptedMessage(QString message, MainWindow* mainWindow, std::shared_ptr<ClientWebSocket> pClient) {
     // First, extract the command from the message
     auto msg = QJsonDocument::fromJson(message.toUtf8());
@@ -617,7 +617,7 @@ void AppDataServer::processDecryptedMessage(QString message, MainWindow* mainWin
         pClient->sendTextMessage(encryptOutgoing(r));
         return;
     }
-    
+
     if (msg.object()["command"] == "getInfo") {
         processGetInfo(msg.object(), mainWindow, pClient);
     }
@@ -693,7 +693,8 @@ void AppDataServer::processSendTx(QJsonObject sendTx, MainWindow* mainwindow, st
         return;
     }
 
-    json params = json::array();
+
+    json params = json::object();
     mainwindow->getRPC()->fillTxJsonParams(params, tx);
     std::cout << std::setw(2) << params << std::endl;
 
@@ -715,7 +716,7 @@ void AppDataServer::processSendTx(QJsonObject sendTx, MainWindow* mainwindow, st
                {"err",  errStr}
             }).toJson();
             pClient->sendTextMessage(encryptOutgoing(r));
-        }   
+        }
     );
 
     auto r = QJsonDocument(QJsonObject{
@@ -729,7 +730,7 @@ void AppDataServer::processSendTx(QJsonObject sendTx, MainWindow* mainwindow, st
 // "getInfo" command
 void AppDataServer::processGetInfo(QJsonObject jobj, MainWindow* mainWindow, std::shared_ptr<ClientWebSocket> pClient) {
     auto connectedName = jobj["name"].toString();
-    
+
     if (mainWindow == nullptr || mainWindow->getRPC() == nullptr) {
         pClient->close(QWebSocketProtocol::CloseCodeNormal, "Not yet ready");
         return;
@@ -768,7 +769,7 @@ void AppDataServer::processGetInfo(QJsonObject jobj, MainWindow* mainWindow, std
 void AppDataServer::processGetTransactions(MainWindow* mainWindow, std::shared_ptr<ClientWebSocket> pClient) {
     QJsonArray txns;
     auto model = mainWindow->getRPC()->getTransactionsModel();
-    
+
     // Add transactions
     for (int i = 0; i < model->rowCount(QModelIndex()) && i < Settings::getMaxMobileAppTxns(); i++) {
         txns.append(QJsonObject{

@@ -6,15 +6,9 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>540</width>
+    <width>733</width>
     <height>539</height>
    </rect>
-  </property>
-  <property name="minimumSize">
-   <size>
-    <width>540</width>
-    <height>500</height>
-   </size>
   </property>
   <property name="windowTitle">
    <string>Settings</string>
@@ -26,7 +20,7 @@
    <item>
     <widget class="QTabWidget" name="tabWidget">
      <property name="currentIndex">
-      <number>0</number>
+      <number>1</number>
      </property>
      <widget class="QWidget" name="tab">
       <attribute name="title">
@@ -87,74 +81,134 @@
        <string>Options</string>
       </attribute>
       <layout class="QGridLayout" name="gridLayout">
-       <item row="6" column="1">
-        <widget class="QComboBox" name="comboBoxTheme">
-         <property name="sizePolicy">
-          <sizepolicy hsizetype="MinimumExpanding" vsizetype="Fixed">
-           <horstretch>0</horstretch>
-           <verstretch>0</verstretch>
-          </sizepolicy>
+       <item row="5" column="1">
+        <widget class="QLabel" name="label_11">
+         <property name="text">
+          <string>Show Tx Fee in the transaction list</string>
          </property>
+        </widget>
+       </item>
+       <item row="9" column="1">
+        <layout class="QHBoxLayout" name="horizontalLayout">
          <item>
-          <property name="text">
-           <string>default</string>
-          </property>
+          <widget class="QLabel" name="label_20">
+           <property name="sizePolicy">
+            <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
+             <horstretch>0</horstretch>
+             <verstretch>0</verstretch>
+            </sizepolicy>
+           </property>
+           <property name="text">
+            <string>Theme</string>
+           </property>
+           <property name="alignment">
+            <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+           </property>
+          </widget>
          </item>
          <item>
-          <property name="text">
-           <string>blue</string>
-          </property>
+          <widget class="QComboBox" name="comboBoxTheme">
+           <property name="sizePolicy">
+            <sizepolicy hsizetype="MinimumExpanding" vsizetype="Fixed">
+             <horstretch>0</horstretch>
+             <verstretch>0</verstretch>
+            </sizepolicy>
+           </property>
+           <property name="minimumSize">
+            <size>
+             <width>0</width>
+             <height>0</height>
+            </size>
+           </property>
+           <property name="sizeIncrement">
+            <size>
+             <width>1</width>
+             <height>0</height>
+            </size>
+           </property>
+           <property name="baseSize">
+            <size>
+             <width>0</width>
+             <height>0</height>
+            </size>
+           </property>
+           <property name="currentText">
+            <string>armada</string>
+           </property>
+           <item>
+            <property name="text">
+             <string>Armada</string>
+            </property>
+           </item>
+           <item>
+            <property name="text">
+             <string>Pirate</string>
+            </property>
+           </item>
+           <item>
+            <property name="text">
+             <string>Pirate Map</string>
+            </property>
+           </item>
+           <item>
+            <property name="text">
+             <string>Ghostship</string>
+            </property>
+           </item>
+           <item>
+            <property name="text">
+             <string>Night</string>
+            </property>
+           </item>
+           <item>
+            <property name="text">
+             <string>Treasure</string>
+            </property>
+           </item>
+           <item>
+            <property name="text">
+             <string>Treasure Map</string>
+            </property>
+           </item>
+
+           <item>
+            <property name="text">
+             <string>Blue</string>
+            </property>
+           </item>
+           <item>
+            <property name="text">
+             <string>Light</string>
+            </property>
+           </item>
+           <item>
+            <property name="text">
+             <string>Dark</string>
+            </property>
+           </item>
+           <item>
+            <property name="text">
+             <string>Default</string>
+            </property>
+           </item>
+          </widget>
          </item>
          <item>
-          <property name="text">
-           <string>light</string>
-          </property>
+          <spacer name="horizontalSpacer">
+           <property name="orientation">
+            <enum>Qt::Horizontal</enum>
+           </property>
+           <property name="sizeHint" stdset="0">
+            <size>
+             <width>60</width>
+             <height>20</height>
+            </size>
+           </property>
+          </spacer>
          </item>
-         <item>
-          <property name="text">
-           <string>dark</string>
-          </property>
-         </item>
-        </widget>
+        </layout>
        </item>
-       <item row="2" column="0" colspan="2">
-        <widget class="QCheckBox" name="chkFetchPrices">
-         <property name="text">
-          <string>Fetch ARRR / USD prices</string>
-         </property>
-        </widget>
-       </item>
-       <item row="0" column="0" colspan="2">
-        <widget class="QCheckBox" name="chkCheckUpdates">
-         <property name="text">
-          <string>Check github for updates at startup</string>
-         </property>
-        </widget>
-       </item>
-       <item row="1" column="0" colspan="2">
-        <widget class="QLabel" name="label_8">
-         <property name="text">
-          <string>Connect to github on startup to check for updates</string>
-         </property>
-        </widget>
-       </item>
-       <item row="6" column="0">
-        <widget class="QLabel" name="label_20">
-         <property name="sizePolicy">
-          <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
-           <horstretch>0</horstretch>
-           <verstretch>0</verstretch>
-          </sizepolicy>
-         </property>
-         <property name="text">
-          <string>Theme</string>
-         </property>
-         <property name="alignment">
-          <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
-         </property>
-        </widget>
-       </item>
-       <item row="8" column="0" colspan="2">
+       <item row="14" column="1">
         <spacer name="verticalSpacer_2">
          <property name="orientation">
           <enum>Qt::Vertical</enum>
@@ -167,7 +221,14 @@
          </property>
         </spacer>
        </item>
-       <item row="7" column="0" colspan="2">
+       <item row="0" column="1">
+        <widget class="QCheckBox" name="chkCheckUpdates">
+         <property name="text">
+          <string>Check for updates</string>
+         </property>
+        </widget>
+       </item>
+       <item row="13" column="1">
         <widget class="Line" name="line_2">
          <property name="sizePolicy">
           <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
@@ -180,12 +241,63 @@
          </property>
         </widget>
        </item>
-       <item row="3" column="0" colspan="2">
+       <item row="1" column="1">
+        <widget class="QLabel" name="label_8">
+         <property name="text">
+          <string>Connect to github on startup to check for updates</string>
+         </property>
+        </widget>
+       </item>
+       <item row="6" column="1">
+        <widget class="QCheckBox" name="chkShowChangeTxns">
+         <property name="text">
+          <string>Show Change Tx</string>
+         </property>
+        </widget>
+       </item>
+       <item row="7" column="1">
+        <widget class="QLabel" name="label_12">
+         <property name="text">
+          <string>Show change transaction in transactions list</string>
+         </property>
+        </widget>
+       </item>
+       <item row="3" column="1">
         <widget class="QLabel" name="label_10">
          <property name="text">
           <string>Connect to the internet to fetch ARRR prices</string>
          </property>
         </widget>
+       </item>
+       <item row="4" column="1">
+        <widget class="QCheckBox" name="chkShowTxFee">
+         <property name="text">
+          <string>Show Tx Fee</string>
+         </property>
+        </widget>
+       </item>
+       <item row="2" column="1">
+        <widget class="QCheckBox" name="chkFetchPrices">
+         <property name="text">
+          <string>Fetch ARRR / USD prices</string>
+         </property>
+        </widget>
+       </item>
+       <item row="8" column="1">
+        <spacer name="verticalSpacer_3">
+         <property name="orientation">
+          <enum>Qt::Vertical</enum>
+         </property>
+         <property name="sizeType">
+          <enum>QSizePolicy::Fixed</enum>
+         </property>
+         <property name="sizeHint" stdset="0">
+          <size>
+           <width>20</width>
+           <height>10</height>
+          </size>
+         </property>
+        </spacer>
        </item>
       </layout>
      </widget>

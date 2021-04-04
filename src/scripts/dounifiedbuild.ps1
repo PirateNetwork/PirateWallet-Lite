@@ -2,9 +2,13 @@
 param (
     [Parameter(Mandatory=$true)][string]$version,
     [Parameter(Mandatory=$true)][string]$prev,
+    [Parameter(Mandatory=$true)][string]$certificate,
+    [Parameter(Mandatory=$true)][string]$username,
+    [Parameter(Mandatory=$true)][string]$password,
     [Parameter(Mandatory=$true)][string]$server,
     [Parameter(Mandatory=$true)][string]$winserver
 )
+
 
 Write-Host "[Initializing]"
 Remove-Item -Force -ErrorAction Ignore ./artifacts/linux-binaries-piratewallet-v$version.tar.gz
@@ -27,7 +31,7 @@ Write-Host ""
 
 
 Write-Host "[Building on Mac]"
-bash src/scripts/mkmacdmg.sh --qt_path ~/Qt/5.11.1/clang_64/ --version $version --zcash_path ~/prod/zcash 
+bash src/scripts/mkmacdmg.sh --qt_path ~/Qt/5.11.1/clang_64/ --version $version --certificate "$certificate" --username "$username" --password "$password"
 if (! $?) {
     Write-Output "[Error]"
     exit 1;
@@ -58,7 +62,7 @@ Write-Host -NoNewline "Building Installer....."
 ssh $winserver "Remove-Item -Path pqwbuild -Recurse"   | Out-Null
 ssh $winserver "New-Item pqwbuild -itemtype directory" | Out-Null
 
-# Note: For some mysterious reason, we can't seem to do a scp from here to windows machine. 
+# Note: For some mysterious reason, we can't seem to do a scp from here to windows machine.
 # So, we'll ssh to windows, and execute an scp command to pull files from here to there.
 # Same while copying the built msi. A straight scp pull from windows to here doesn't work,
 # so we ssh to windows, and then scp push the file to here.
@@ -67,7 +71,7 @@ $myhostname = (ipconfig getifaddr en0) | Out-String -NoNewline
 # Remove-Item -Path /tmp/pqwbuild -Recurse -ErrorAction Ignore | Out-Null
 bash "rm -rf /tmp/pqwbuild" 2>&1 | Out-Null
 New-Item    -Path /tmp/pqwbuild -itemtype directory -Force | Out-Null
-Copy-Item src     /tmp/pqwbuild/ -Recurse -Force 
+Copy-Item src     /tmp/pqwbuild/ -Recurse -Force
 Copy-Item res     /tmp/pqwbuild/ -Recurse -Force
 Copy-Item release /tmp/pqwbuild/ -Recurse -Force
 
@@ -89,7 +93,7 @@ Write-Host -NoNewline "Checking Build........."
 if (! (Test-Path ./artifacts/linux-binaries-piratewallet-v$version.tar.gz) -or
     ! (Test-Path ./artifacts/linux-deb-piratewallet-v$version.deb) -or
     ! (Test-Path ./artifacts/Windows-binaries-piratewallet-v$version.zip) -or
-    ! (Test-Path ./artifacts/macOS-piratewallet-v$version.dmg) -or 
+    ! (Test-Path ./artifacts/macOS-piratewallet-v$version.dmg) -or
     ! (Test-Path ./artifacts/Windows-installer-piratewallet-v$version.msi) ) {
         Write-Host "[Error]"
         exit 1;

@@ -42,13 +42,16 @@ public:
     void fetchTransactions        (const std::function<void(json)>& cb);
     void fetchAddresses           (const std::function<void(json)>& cb);
 
-    void fetchInfo(const std::function<void(json)>& cb, 
+    void fetchInfo(const std::function<void(json)>& cb,
                     const std::function<void(QString)>& err);
 
-    void fetchLatestBlock(const std::function<void(json)>& cb, 
+    void fetchLatestBlock(const std::function<void(json)>& cb,
                         const std::function<void(QString)>& err);
-    
+
     void fetchBalance(const std::function<void(json)>& cb);
+
+    void syncWallet(const std::function<void(json)>& cb, 
+                        const std::function<void(QString)>& err);
 
     void createNewZaddr(bool sapling, const std::function<void(json)>& cb);
     // void createNewTaddr(const std::function<void(json)>& cb);
@@ -67,7 +70,7 @@ public:
 
     //void importZPrivKey(QString addr, bool rescan, const std::function<void(json)>& cb);
     //void importTPrivKey(QString addr, bool rescan, const std::function<void(json)>& cb);
-   
+
     void sendTransaction(QString params, const std::function<void(json)>& cb, const std::function<void(QString)>& err);
 
 private:

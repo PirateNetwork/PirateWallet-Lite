@@ -12,8 +12,18 @@ case $key in
     shift # past argument
     shift # past value
     ;;
-    -z|--zcash_path)
-    ZCASH_DIR="$2"
+    -c|--certificate)
+    CERTIFICATE="$2"
+    shift # past argument
+    shift # past value
+    ;;
+    -u|--username)
+    APPLE_USERNAME="$2"
+    shift # past argument
+    shift # past value
+    ;;
+    -p|--password)
+    APPLE_PASSWORD="$2"
     shift # past argument
     shift # past value
     ;;
@@ -30,9 +40,9 @@ esac
 done
 set -- "${POSITIONAL[@]}" # restore positional parameters
 
-if [ -z $QT_PATH ]; then 
-    echo "QT_PATH is not set. Please set it to the base directory of Qt"; 
-    exit 1; 
+if [ -z $QT_PATH ]; then
+    echo "QT_PATH is not set. Please set it to the base directory of Qt";
+    exit 1;
 fi
 
 if [ -z $APP_VERSION ]; then
@@ -60,6 +70,13 @@ QT_STATIC=$QT_PATH src/scripts/dotranslations.sh >/dev/null
 $QT_PATH/bin/qmake piratewallet-lite.pro CONFIG+=release >/dev/null
 echo "[OK]"
 
+printf "Building Sodium Library...............\n"
+printf "\n"
+./res/libsodium/build.sh > /dev/null
+
+printf "Building Rust Library...............\n"
+printf "\n"
+./res/libzecwalletlite/build.sh > /dev/null
 
 echo -n "Building..............."
 make -j4 >/dev/null
@@ -70,9 +87,16 @@ echo -n "Deploying.............."
 mkdir artifacts >/dev/null 2>&1
 rm -f artifcats/piratewallet-lite.dmg >/dev/null 2>&1
 rm -f artifacts/rw* >/dev/null 2>&1
-$QT_PATH/bin/macdeployqt piratewallet-lite.app 
+$QT_PATH/bin/macdeployqt piratewallet-lite.app
 echo "[OK]"
 
+
+# Code Signing Note:
+# On MacOS, you still need to run these 3 commands:
+# xcrun altool --notarize-app -t osx -f macOS-zecwallet-lite-v1.0.0.dmg --primary-bundle-id="com.yourcompany.zecwallet-lite" -u "apple developer id@email.com" -p "one time password"
+# xcrun altool --notarization-info <output from pervious command> -u "apple developer id@email.com" -p "one time password"
+#...wait for the notarization to finish...
+# xcrun stapler staple macOS-zerwallet-lite-v1.0.0.dmg
 
 echo -n "Building dmg..........."
 mv piratewallet-lite.app PirateWallet-Lite.app
@@ -82,4 +106,9 @@ if [ ! -f artifacts/macOS-piratewallet-lite-v$APP_VERSION.dmg ]; then
     echo "[ERROR]"
     exit 1
 fi
+echo  "[OK]"
+
+# Submit to Apple for notarization
+echo -n "Apple notarization....."
+xcrun altool --notarize-app -t osx -f artifacts/macOS-zecwallet-lite-v$APP_VERSION.dmg --primary-bundle-id="com.yourcompany.zecwallet-lite" -u "$APPLE_USERNAME" -p "$APPLE_PASSWORD"
 echo  "[OK]"
