@@ -26,7 +26,7 @@ echo "[Building on" `lsb_release -r`"]"
 
 echo -n "Configuring............"
 QT_STATIC=$QT_STATIC bash src/scripts/dotranslations.sh >/dev/null
-$QT_STATIC/bin/qmake piratewallet-lite.pro -spec linux-clang CONFIG+=release > /dev/null
+$QT_STATIC/bin/qmake piratewallet-lite.pro -spec linux-g++-64 CONFIG+=release > /dev/null
 echo "[OK]"
 
 
@@ -41,7 +41,7 @@ printf "\n"
 printf "Building QT Wallet..............."
 rm -rf bin/piratewallet* > /dev/null
 rm -rf release/ > /dev/null
-make -j$(nproc) > /dev/null
+make -j4 > /dev/null
 printf "[OK]\n"
 
 
@@ -141,7 +141,7 @@ printf "Building QT Wallet..............."
 # Build the lib first
 # cd lib && make winrelease && cd ..
 x86_64-w64-mingw32.static-qmake-qt5 piratewallet-lite-mingw.pro CONFIG+=release > /dev/null
-make -j32 -Winvalid-pch > /dev/null
+make -j4 -Winvalid-pch > /dev/null
 echo "[OK]"
 
 
