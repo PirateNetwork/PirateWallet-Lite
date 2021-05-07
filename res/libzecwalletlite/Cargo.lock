@@ -2985,7 +2985,7 @@ dependencies = [
 [[package]]
 name = "zecwalletlitelib"
 version = "0.1.0"
-source = "git+https://github.com/piratenetwork/piratewallet-light-cli?rev=5a7848381e93d4874375bddc7117efb73678b94e#5a7848381e93d4874375bddc7117efb73678b94e"
+source = "git+https://github.com/piratenetwork/piratewallet-light-cli?rev=de1144831600c5e2fdb8ccc9eaeef0759fa6774b#de1144831600c5e2fdb8ccc9eaeef0759fa6774b"
 dependencies = [
  "base58",
  "bellman",
