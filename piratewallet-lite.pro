@@ -149,7 +149,7 @@ QMAKE_CLEAN += res/zecwalletlite.lib res/libzecwalletlite.a res/unixlibs/libsodi
 
 win32: LIBS += -L$$PWD/res -lzecwalletlite -L$$PWD/res/win32libs -lsodium -lsecur32 -lcrypt32 -lncrypt
 else:macx: LIBS += -L$$PWD/res -lzecwalletlite -framework Security -framework Foundation -L$$PWD/res/unixlibs -lsodium
-else:unix: LIBS += -L$$PWD/res -lzecwalletlite -ldl -L$$PWD/res/unixlibs -lsodium
+else:unix: LIBS += -L$$PWD/res -lzecwalletlite -ldl -L$$PWD/res/unixlibs -lsodium -lssl -lcrypto
 
 win32:PRE_TARGETDEPS += $$PWD/res/zecwalletlite.lib $$PWD/res/win32libs/libsodium.a
 else:PRE_TARGETDEPS += $$PWD/res/libzecwalletlite.a $$PWD/res/unixlibs/libsodium.a
