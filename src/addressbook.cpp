@@ -275,12 +275,16 @@ void AddressBook::readFromStorage() {
     }
 
     // Special.
-    // Add the default PirateWallet donation address if it isn't already present
+    // Remove the default PirateWallet donation address it present
     QList<QString> allAddresses;
     std::transform(allLabels.begin(), allLabels.end(),
         std::back_inserter(allAddresses), [=] (auto i) { return i.second; });
-    if (!allAddresses.contains(Settings::getDonationAddr())) {
-       allLabels.append(QPair<QString, QString>("PirateWallet donation", Settings::getDonationAddr()));
+
+    for (QList<QPair<QString, QString>>::iterator it = allLabels.begin(); it != allLabels.end(); it++) {
+        if (it->second == Settings::getDonationAddr()) {
+            allLabels.erase(it);
+            writeToStorage();
+        }
     }
 }
 
