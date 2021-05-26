@@ -6,8 +6,23 @@ ViewAllAddressesModel::ViewAllAddressesModel(QTableView *parent, Controller* rpc
      : QAbstractTableModel(parent) {
     headers << tr("Address") << tr("Balance (%1)").arg(Settings::getTokenName());
     this->rpc = rpc;
+
+    //Set Addresses
+    auto addrs = this->rpc->getModel()->getAllZAddresses();
+    replaceData(addrs);
 }
 
+void ViewAllAddressesModel::replaceData(QList<QString>& data) {
+    addresses.clear();
+
+    // Copy over the data and sort it
+    for(QList<QString>::iterator it = data.begin(); it != data.end(); it++) {
+        addresses.append(*it);
+    }
+
+    dataChanged(index(0, 0), index(addresses.size()-1, columnCount(index(0,0))-1));
+    layoutChanged();
+}
 
 int ViewAllAddressesModel::rowCount(const QModelIndex&) const {
     return addresses.size();

@@ -10,6 +10,7 @@ public:
     ViewAllAddressesModel(QTableView* parent, Controller* rpc);
     ~ViewAllAddressesModel() = default;
 
+    void     replaceData(QList<QString>& data);
     int      rowCount(const QModelIndex &parent) const;
     int      columnCount(const QModelIndex &parent) const;
     QVariant data(const QModelIndex &index, int role) const;
