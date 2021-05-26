@@ -610,7 +610,7 @@ void Controller::checkForUpdate(bool silent) {
     if (!zrpc->haveConnection())
         return noConnection();
 
-    QUrl cmcURL("https://api.github.com/repos/MrMLynch/PirateWallet-Lite/releases");
+    QUrl cmcURL("https://api.github.com/repos/PirateNetwork/PirateWallet-Lite/releases");
 
     QNetworkRequest req;
     req.setUrl(cmcURL);
@@ -742,7 +742,7 @@ void Controller::refreshZECPrice() {
             }
         } catch (...) {
             // If anything at all goes wrong, just set the price to 0 and move on.
-            qDebug() << QString("Caught something nasty - refresh Zero Price");
+            qDebug() << QString("Caught something nasty - refresh Arrr Price");
         }
 
         // If nothing, then set the price to 0;
