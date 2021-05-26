@@ -216,6 +216,7 @@ void Controller::getInfoThenRefresh(bool force) {
                             QString::fromStdString(zrpc->getConnection()->getInfo().dump());
         QIcon i(":/icons/res/connected.gif");
         QString chainName = Settings::getInstance()->isTestnet() ? "test" : "main";
+        main->statusLabel->setVisible(true);
         main->statusLabel->setText(chainName + "(" + QString::number(curBlock) + ")");
         main->statusLabel->setText(" Current Block: " + QString::number(curBlock) + " |" + " ARRR/USD=$" + QString::number( (double) Settings::getInstance()->getZECPrice() ));
         main->statusLabel->setToolTip(tooltip);
