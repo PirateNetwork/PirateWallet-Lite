@@ -185,7 +185,7 @@ checksum = "cdcf67bb7ba7797a081cd19009948ab533af7c355d5caf1d08c777582d351e9c"
 [[package]]
 name = "bellman"
 version = "0.6.0"
-source = "git+https://github.com/zerocurrencycoin/librustzcash.git?rev=2981c4d2860f7cd73282fed885daac0323ff0280#2981c4d2860f7cd73282fed885daac0323ff0280"
+source = "git+https://github.com/piratenetwork/librustzcash.git?rev=2981c4d2860f7cd73282fed885daac0323ff0280#2981c4d2860f7cd73282fed885daac0323ff0280"
 dependencies = [
  "bit-vec",
  "blake2s_simd",
@@ -553,7 +553,7 @@ checksum = "e88a8acf291dafb59c2d96e8f59828f3838bb1a70398823ade51a84de6a6deed"
 [[package]]
 name = "ff"
 version = "0.6.0"
-source = "git+https://github.com/zerocurrencycoin/librustzcash.git?rev=2981c4d2860f7cd73282fed885daac0323ff0280#2981c4d2860f7cd73282fed885daac0323ff0280"
+source = "git+https://github.com/piratenetwork/librustzcash.git?rev=2981c4d2860f7cd73282fed885daac0323ff0280#2981c4d2860f7cd73282fed885daac0323ff0280"
 dependencies = [
  "byteorder",
  "ff_derive",
@@ -564,7 +564,7 @@ dependencies = [
 [[package]]
 name = "ff_derive"
 version = "0.6.0"
-source = "git+https://github.com/zerocurrencycoin/librustzcash.git?rev=2981c4d2860f7cd73282fed885daac0323ff0280#2981c4d2860f7cd73282fed885daac0323ff0280"
+source = "git+https://github.com/piratenetwork/librustzcash.git?rev=2981c4d2860f7cd73282fed885daac0323ff0280#2981c4d2860f7cd73282fed885daac0323ff0280"
 dependencies = [
  "addchain",
  "num-bigint",
@@ -770,7 +770,7 @@ checksum = "bcc8e0c9bce37868955864dbecd2b1ab2bdf967e6f28066d65aaac620444b65c"
 [[package]]
 name = "group"
 version = "0.6.0"
-source = "git+https://github.com/zerocurrencycoin/librustzcash.git?rev=2981c4d2860f7cd73282fed885daac0323ff0280#2981c4d2860f7cd73282fed885daac0323ff0280"
+source = "git+https://github.com/piratenetwork/librustzcash.git?rev=2981c4d2860f7cd73282fed885daac0323ff0280#2981c4d2860f7cd73282fed885daac0323ff0280"
 dependencies = [
  "byteorder",
  "ff",
@@ -1366,7 +1366,7 @@ dependencies = [
 [[package]]
 name = "pairing"
 version = "0.16.0"
-source = "git+https://github.com/zerocurrencycoin/librustzcash.git?rev=2981c4d2860f7cd73282fed885daac0323ff0280#2981c4d2860f7cd73282fed885daac0323ff0280"
+source = "git+https://github.com/piratenetwork/librustzcash.git?rev=2981c4d2860f7cd73282fed885daac0323ff0280#2981c4d2860f7cd73282fed885daac0323ff0280"
 dependencies = [
  "byteorder",
  "ff",
@@ -2931,7 +2931,7 @@ dependencies = [
 [[package]]
 name = "zcash_client_backend"
 version = "0.2.0"
-source = "git+https://github.com/zerocurrencycoin/librustzcash.git?rev=2981c4d2860f7cd73282fed885daac0323ff0280#2981c4d2860f7cd73282fed885daac0323ff0280"
+source = "git+https://github.com/piratenetwork/librustzcash.git?rev=2981c4d2860f7cd73282fed885daac0323ff0280#2981c4d2860f7cd73282fed885daac0323ff0280"
 dependencies = [
  "bech32",
  "bs58",
@@ -2947,7 +2947,7 @@ dependencies = [
 [[package]]
 name = "zcash_primitives"
 version = "0.2.0"
-source = "git+https://github.com/zerocurrencycoin/librustzcash.git?rev=2981c4d2860f7cd73282fed885daac0323ff0280#2981c4d2860f7cd73282fed885daac0323ff0280"
+source = "git+https://github.com/piratenetwork/librustzcash.git?rev=2981c4d2860f7cd73282fed885daac0323ff0280#2981c4d2860f7cd73282fed885daac0323ff0280"
 dependencies = [
  "aes",
  "blake2b_simd",
@@ -2971,7 +2971,7 @@ dependencies = [
 [[package]]
 name = "zcash_proofs"
 version = "0.2.0"
-source = "git+https://github.com/zerocurrencycoin/librustzcash.git?rev=2981c4d2860f7cd73282fed885daac0323ff0280#2981c4d2860f7cd73282fed885daac0323ff0280"
+source = "git+https://github.com/piratenetwork/librustzcash.git?rev=2981c4d2860f7cd73282fed885daac0323ff0280#2981c4d2860f7cd73282fed885daac0323ff0280"
 dependencies = [
  "bellman",
  "blake2b_simd",
@@ -2985,7 +2985,7 @@ dependencies = [
 [[package]]
 name = "zecwalletlitelib"
 version = "0.1.0"
-source = "git+https://github.com/piratenetwork/piratewallet-light-cli?rev=de1144831600c5e2fdb8ccc9eaeef0759fa6774b#de1144831600c5e2fdb8ccc9eaeef0759fa6774b"
+source = "git+https://github.com/piratenetwork/piratewallet-light-cli?rev=ddada7676bbd1f86d9e8fe220102235b0410e79e#ddada7676bbd1f86d9e8fe220102235b0410e79e"
 dependencies = [
  "base58",
  "bellman",
