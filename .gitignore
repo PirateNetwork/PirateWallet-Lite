@@ -15,6 +15,7 @@ res/libsodium/win*
 res/unixlibs*
 res/win32libs*
 res/libzecwalletlite/open*
+res/qt*
 src/ui_*.h
 *.autosave
 src/precompiled.h.cpp
