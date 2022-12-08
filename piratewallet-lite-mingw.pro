@@ -90,7 +90,7 @@ HEADERS += \
     src/controller.h \
     src/liteinterface.h \
     src/camount.h \
-    res/libzecwalletlite/zecwalletlitelib.h
+    res/libzecwalletlite/piratewalletlitelib.h
 
 FORMS += \
     src/encryption.ui \

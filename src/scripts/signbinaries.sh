@@ -37,7 +37,7 @@ sha256sum *$APP_VERSION* > sha256sum-v$APP_VERSION.txt
 
 for i in $( ls *piratewallet-lite-v$APP_VERSION* sha256sum-v$APP_VERSION* ); do
   echo "Signing" $i
-  gpg2 --batch --output ../release/signatures/$i.sig --detach-sig $i
+  gpg --batch --output ../release/signatures/$i.sig --detach-sig $i
 done
 
 mv sha256sum-v$APP_VERSION.txt ../release/signatures/

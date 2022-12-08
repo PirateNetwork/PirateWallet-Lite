@@ -4,7 +4,7 @@
 #include "ui_restoreseed.h"
 #include "ui_newwallet.h"
 
-#include "../res/libzecwalletlite/zecwalletlitelib.h"
+#include "../res/libzecwalletlite/piratewalletlitelib.h"
 
 using json = nlohmann::json;
 
