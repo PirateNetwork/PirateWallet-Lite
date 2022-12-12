@@ -29,6 +29,7 @@ public:
     static  Settings* getInstance();
 
     Config  getSettings();
+    Config  setDefaultServer();
     void    saveSettings(const QString& server);
 
     bool    isTestnet();

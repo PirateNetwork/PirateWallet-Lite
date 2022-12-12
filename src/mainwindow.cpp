@@ -453,7 +453,11 @@ void MainWindow::setupSettingsModal() {
         settings.chkShowChangeTxns->setChecked(Settings::getInstance()->getShowChangeTxns());
 
         // List of default servers
-        settings.cmbServer->addItem("https://lightd.pirate.black:443");
+        settings.cmbServer->addItem("https://lightd1.pirate.black:443");
+        settings.cmbServer->addItem("https://piratelightd1.cryptoforge.cc:443");
+        settings.cmbServer->addItem("https://piratelightd2.cryptoforge.cc:443");
+        settings.cmbServer->addItem("https://piratelightd3.cryptoforge.cc:443");
+        settings.cmbServer->addItem("https://piratelightd4.cryptoforge.cc:443");
 
         // Load current values into the dialog
         auto conf = Settings::getInstance()->getSettings();

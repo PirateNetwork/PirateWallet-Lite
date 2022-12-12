@@ -11,4 +11,7 @@ crate-type = ["staticlib"]
 [dependencies]
 libc = "0.2.138"
 lazy_static = "1.4.0"
-piratewalletlitelib = { git="https://github.com/piratenetwork/piratewallet-light-cli", rev="82c0e18fe94056fdb5182257c36694b01aa18eb7" }
+piratewalletlitelib = { git="https://github.com/piratenetwork/piratewallet-light-cli", rev="3406597f6cbb49d55fe8cb84fc484d67311d3b44", default-features = false, features = ["embed_params"] }
+
+#test local changes
+#piratewalletlitelib = { path = '../../../piratewallet-light-cli/lib' ,  default-features = false, features = ["embed_params"]}

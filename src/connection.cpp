@@ -18,6 +18,7 @@ ConnectionLoader::ConnectionLoader(MainWindow* main, Controller* rpc) {
     this->rpc  = rpc;
 
     d = new QDialog(main);
+    d->setWindowFlag(Qt::WindowCloseButtonHint, false);
     connD = new Ui_ConnectionDialog();
     connD->setupUi(d);
     QPixmap logo(":img/res/logo.png");
@@ -45,11 +46,15 @@ void ConnectionLoader::doAutoConnect() {
     config->dangerous = false;
     config->server = Settings::getInstance()->getSettings().server;
 
+    if (!litelib_check_server(config->server.toStdString().c_str())) {
+        config->server = Settings::getInstance()->setDefaultServer().server;
+    }
+
     // Initialize the library
     main->logger->write(QObject::tr("Attempting to initialize library with ") + config->server);
 
     // Check to see if there's an existing wallet
-    if (litelib_wallet_exists(Settings::getDefaultChainName().toStdString().c_str())) {
+    if (litelib_wallet_exists()) {
         main->logger->write(QObject::tr("Using existing wallet."));
         char* resp = litelib_initialize_existing(config->server.toStdString().c_str());
         QString response = litelib_process_response(resp);
@@ -92,6 +97,8 @@ void ConnectionLoader::doAutoConnect() {
 
         // While it is syncing, we'll show the status updates while it is alive.
         QObject::connect(syncTimer, &QTimer::timeout, [=]() {
+            //mkae sure to display the dialog
+            d->show();
             // Check the sync status
             if (isSyncing != nullptr && isSyncing->loadRelaxed()) {
                 main->statusLabel->setVisible(false);
@@ -99,10 +106,25 @@ void ConnectionLoader::doAutoConnect() {
                 main->syncingLabel->setVisible(true);
                 // Get the sync status
                 connection->doRPC("syncstatus", "", [=](json reply) {
-                    if (isSyncing != nullptr && reply.find("synced_blocks") != reply.end()) {
-                        qint64 synced = reply["synced_blocks"].get<json::number_unsigned_t>();
-                        qint64 total = reply["total_blocks"].get<json::number_unsigned_t>();
-                        me->showInformation("Synced " + QString::number(synced) + " / " + QString::number(total));
+                    if (isSyncing != nullptr ) {
+
+                        qint64 endBlock = 0;
+                        if (reply.find("end_block") != reply.end()) {
+                            endBlock = reply["end_block"].get<json::number_unsigned_t>();
+                        }
+
+                        qint64 synced = 0;
+                        if (reply.find("synced_blocks") != reply.end()) {
+                            synced = reply["synced_blocks"].get<json::number_unsigned_t>();
+                        }
+
+                        qint64 total = 0;
+                        auto info = connection->getInfo();
+                        if (info.find("latest_block_height") != info.end()) {
+                            total = info["latest_block_height"].get<json::number_unsigned_t>();
+                        }
+
+                        me->showInformation("Synced " + QString::number(endBlock + synced) + " / " + QString::number(total));
                     }
                     qApp->processEvents();
                 },

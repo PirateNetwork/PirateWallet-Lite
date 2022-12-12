@@ -46,7 +46,7 @@
           </size>
          </property>
          <property name="text">
-          <string>Lightwallet Server - default is: https://lightd.pirate.black:443</string>
+          <string>Lightwallet Server - default is: https://lightd1.pirate.black:443</string>
          </property>
         </widget>
        </item>

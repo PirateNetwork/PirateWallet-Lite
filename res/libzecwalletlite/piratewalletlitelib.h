@@ -5,7 +5,8 @@
 extern "C" {
 #endif
 
-extern bool   litelib_wallet_exists       (const char* chain_name);
+extern bool   litelib_check_server        (const char* server);
+extern bool   litelib_wallet_exists       ();
 extern char * litelib_initialize_new      (const char* server);
 extern char * litelib_initialize_new_from_phrase
                                           (const char* server, const char* seed,

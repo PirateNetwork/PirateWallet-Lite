@@ -27,6 +27,13 @@ Config Settings::getSettings() {
     return Config{server};
 }
 
+Config Settings::setDefaultServer() {
+
+    auto server = Settings::getDefaultServer();
+
+    return Config{server};
+}
+
 void Settings::saveSettings(const QString& server) {
     QSettings s;
 
@@ -173,7 +180,7 @@ void Settings::saveRestoreTableHeader(QTableView* table, QDialog* d, QString tab
 }
 
 QString Settings::getDefaultServer() {
-    return "https://lightd.pirate.black:443/";
+    return "https://lightd1.pirate.black:443/";
 }
 
 void Settings::openAddressInExplorer(QString address) {

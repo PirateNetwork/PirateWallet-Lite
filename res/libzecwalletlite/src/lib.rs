@@ -30,6 +30,19 @@ pub extern fn litelib_wallet_exists() -> bool {
     config.wallet_exists()
 }
 
+// Check that the server is valid
+#[no_mangle]
+pub extern fn litelib_check_server(server: *const c_char) -> bool {
+    let server_str = unsafe {
+        assert!(!server.is_null());
+
+        CStr::from_ptr(server).to_string_lossy().into_owned()
+    };
+
+    LightClientConfig::<MainNetwork>::check_server(server_str)
+}
+
+
 /// Create a new wallet and return the seed for the newly created wallet.
 #[no_mangle]
 pub extern fn litelib_initialize_new(server: *const c_char) -> *mut c_char {
@@ -38,6 +51,8 @@ pub extern fn litelib_initialize_new(server: *const c_char) -> *mut c_char {
 
         CStr::from_ptr(server).to_string_lossy().into_owned()
     };
+
+    println!("Connecting to server: {}", server_str);
 
     let server = LightClientConfig::<MainNetwork>::get_server_or_default(Some(server_str));
     let (config, latest_block_height) = match LightClientConfig::create(MainNetwork,server) {
@@ -86,6 +101,8 @@ pub extern fn litelib_initialize_new_from_phrase(server: *const c_char,
         CStr::from_ptr(server).to_string_lossy().into_owned()
     };
 
+    println!("Connecting to server: {}", server_str);
+
     let seed_str = unsafe {
         assert!(!seed.is_null());
 
@@ -126,6 +143,8 @@ pub extern fn litelib_initialize_existing(server: *const c_char) -> *mut c_char 
 
         CStr::from_ptr(server).to_string_lossy().into_owned()
     };
+
+    println!("Connecting to server: {}", server_str);
 
     let server = LightClientConfig::<MainNetwork>::get_server_or_default(Some(server_str));
     let (config, _latest_block_height) = match LightClientConfig::create(MainNetwork,server) {
