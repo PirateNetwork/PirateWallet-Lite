@@ -5,13 +5,12 @@ authors = ["MrLynch", "Forge"]
 edition = "2018"
 
 [lib]
-name = "zecwalletlite"
+name = "piratewalletlite"
 crate-type = ["staticlib"]
 
 [dependencies]
-libc = "0.2.138"
 lazy_static = "1.4.0"
-piratewalletlitelib = { git="https://github.com/piratenetwork/piratewallet-light-cli", rev="3406597f6cbb49d55fe8cb84fc484d67311d3b44", default-features = false, features = ["embed_params"] }
+piratewalletlitelib = { git="https://github.com/piratenetwork/piratewallet-light-cli", rev="eddf6f595bc0d0cafba4285fdcee351f1f1a526d", default-features = false, features = ["embed_params"] }
 
 #test local changes
 #piratewalletlitelib = { path = '../../../piratewallet-light-cli/lib' ,  default-features = false, features = ["embed_params"]}

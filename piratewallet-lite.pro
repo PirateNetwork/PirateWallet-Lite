@@ -141,20 +141,21 @@ else: unix:!android: target.path = /opt/$${TARGET}/bin
 unix:       libsodium.target = $$PWD/res/unixlibs/libsodium.a
 else:win32: libsodium.target = $$PWD/res/win32libs/libsodium.a
 
-unix:        librust.target   = $$PWD/res/libzecwalletlite.a
-else:win32:  librust.target   = $$PWD/res/zecwalletlite.lib
+unix:        libpiratewalletlite.target   = $$PWD/res/unixlibs/libpiratewalletlite.a
+else:win32:  libpiratewalletlite.target   = $$PWD/res/win32libs/libpiratewalletlite.a
 
-QMAKE_EXTRA_TARGETS += librust libsodium
-QMAKE_CLEAN += res/zecwalletlite.lib res/libzecwalletlite.a res/unixlibs/libsodium.a res/win32libs/libsodium.a
+QMAKE_EXTRA_TARGETS += libpiratewalletlite libsodium
+QMAKE_CLEAN += res/win32libs/libpiratewalletlite.a res/unixlibs/libpiratewalletlite.a res/unixlibs/libsodium.a res/win32libs/libsodium.a
 
-win32: LIBS += -L$$PWD/res -lzecwalletlite -L$$PWD/res/win32libs -lsodium -lsecur32 -lcrypt32 -lncrypt
-else:macx: LIBS += -L$$PWD/res -lzecwalletlite -framework Security -framework Foundation -L$$PWD/res/unixlibs -lsodium
-else:unix: LIBS += -L$$PWD/res -lzecwalletlite -ldl -L$$PWD/res/unixlibs -lsodium
+win32: LIBS += -L$$PWD/res/win32libs -lpiratewalletlite -lsodium -lsecur32 -lcrypt32 -lncrypt
+else:macx: LIBS += -framework Security -framework Foundation -L$$PWD/res/unixlibs -lpiratewalletlite -lsodium
+else:unix: LIBS += -L$$PWD/res/unixlibs -lsodium -lpiratewalletlite -ldl
 
-win32:PRE_TARGETDEPS += $$PWD/res/zecwalletlite.lib $$PWD/res/win32libs/libsodium.a
-else:PRE_TARGETDEPS += $$PWD/res/libzecwalletlite.a $$PWD/res/unixlibs/libsodium.a
+win32:PRE_TARGETDEPS += $$PWD/res/win32libs/libpiratewalletlite.a $$PWD/res/win32libs/libsodium.a
+else:PRE_TARGETDEPS += $$PWD/res/unixlibs/libpiratewalletlite.a $$PWD/res/unixlibs/libsodium.a
 
 INCLUDEPATH += $$PWD/res
 DEPENDPATH += $$PWD/res
+
 
 DISTFILES +=

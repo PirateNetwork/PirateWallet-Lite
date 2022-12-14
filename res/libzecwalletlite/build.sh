@@ -1,15 +1,6 @@
 #!/bin/bash
 
-# First thing to do is see if libsodium.a exists in the res folder. If it does, then there's nothing to do
-if [ -f res/libzecwalletlite.a ]; then
-    rm res/libzecwalletlite.a
-fi
-
-if [ -f res/zecwalletlite.lib ]; then
-    rm res/zecwalletlite.lib
-fi
-
-echo "Building libzecwalletlite"
+echo "Building libpiratewalletlite"
 
 # Now build it
 cd res/libzecwalletlite
@@ -19,4 +10,4 @@ cargo build --lib --release
 
 
 # copy the library to the parents's res/ folder
-cp target/release/libzecwalletlite.a ../
+cp target/release/libpiratewalletlite.a ../unixlibs/libpiratewalletlite.a
