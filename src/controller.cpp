@@ -762,6 +762,11 @@ void Controller::shutdownZcashd() {
 
         bool finished = false;
 
+        zrpc->stopWallet([&] (json) {
+            if (!finished)
+                d.accept();
+        });
+
         zrpc->saveWallet([&] (json) {
             if (!finished)
                 d.accept();

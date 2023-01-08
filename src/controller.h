@@ -64,7 +64,9 @@ public:
 
     void clearWallet(const std::function<void(json)>& cb) { zrpc->clearWallet(cb); }
 
-    void createNewZaddr(bool sapling, const std::function<void(json)>& cb) { 
+    void stopWallet(const std::function<void(json)>& cb) { zrpc->stopWallet(cb); }
+
+    void createNewZaddr(bool sapling, const std::function<void(json)>& cb) {
         unlockIfEncrypted([=] () {
             zrpc->createNewZaddr(sapling, cb);
         }, [=](){});

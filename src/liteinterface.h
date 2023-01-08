@@ -63,6 +63,8 @@ public:
     void saveWallet(const std::function<void(json)>& cb);
     void clearWallet(const std::function<void(json)>& cb);
 
+    void stopWallet(const std::function<void(json)>& cb);
+
     void fetchWalletEncryptionStatus(const std::function<void(json)>& cb);
     void encryptWallet(QString password, const std::function<void(json)>& cb);
     void unlockWallet(QString password, const std::function<void(json)>& cb);

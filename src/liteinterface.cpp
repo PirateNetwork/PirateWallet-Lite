@@ -91,6 +91,13 @@ void LiteInterface::clearWallet(const std::function<void(json)>& cb) {
     conn->doRPCWithDefaultErrorHandling("clear", "", cb);
 }
 
+void LiteInterface::stopWallet(const std::function<void(json)>& cb) {
+    if (conn == nullptr)
+        return;
+
+    conn->doRPCWithDefaultErrorHandling("quit", "", cb);
+}
+
 void LiteInterface::unlockWallet(QString password, const std::function<void(json)>& cb) {
     if (conn == nullptr)
         return;
