@@ -147,7 +147,7 @@ else:win32:  libpiratewalletlite.target   = $$PWD/res/win32libs/libpiratewalletl
 QMAKE_EXTRA_TARGETS += libpiratewalletlite libsodium
 QMAKE_CLEAN += res/win32libs/libpiratewalletlite.a res/unixlibs/libpiratewalletlite.a res/unixlibs/libsodium.a res/win32libs/libsodium.a
 
-win32: LIBS += -L$$PWD/res/win32libs -lpiratewalletlite -lsodium -lsecur32 -lcrypt32 -lncrypt
+win32: LIBS += -L$$PWD/res/win32libs -lpiratewalletlite -lsodium -lsecur32 -lcrypt32 -lncrypt -lntdll
 else:macx: LIBS += -framework Security -framework Foundation -L$$PWD/res/unixlibs -lpiratewalletlite -lsodium
 else:unix: LIBS += -L$$PWD/res/unixlibs -lsodium -lpiratewalletlite -ldl
 
