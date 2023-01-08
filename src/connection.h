@@ -40,14 +40,15 @@ private:
 
     void doRPCSetConnection(Connection* conn);
 
-    QTimer*                 syncTimer   = nullptr;
-    QAtomicInteger<bool>*   isSyncing   = nullptr;
+    QTimer*                 syncTimer           = nullptr;
+    QTimer*                 syncDisplayTimer    = nullptr;
+    QAtomicInteger<bool>*   isSyncing           = nullptr;
 
-    QDialog*                d           = nullptr;
-    Ui_ConnectionDialog*    connD       = nullptr;
+    QDialog*                d                   = nullptr;
+    Ui_ConnectionDialog*    connD               = nullptr;
 
-    MainWindow*             main        = nullptr;
-    Controller*             rpc         = nullptr;
+    MainWindow*             main                = nullptr;
+    Controller*             rpc                 = nullptr;
 };
 
 /**

@@ -18,7 +18,6 @@ ConnectionLoader::ConnectionLoader(MainWindow* main, Controller* rpc) {
     this->rpc  = rpc;
 
     d = new QDialog(main);
-    d->setWindowFlag(Qt::WindowCloseButtonHint, false);
     connD = new Ui_ConnectionDialog();
     connD->setupUi(d);
     QPixmap logo(":img/res/logo.png");
@@ -84,12 +83,14 @@ void ConnectionLoader::doAutoConnect() {
 
         // Do a sync at startup
         syncTimer = new QTimer(main);
+        syncDisplayTimer = new QTimer(main);
         connection->doRPCWithDefaultErrorHandling("sync", "", [=](auto) {
             isSyncing->storeRelaxed(false);
             Settings::getInstance()->setSyncing(false);
 
             // Cancel the timer
             syncTimer->deleteLater();
+            syncDisplayTimer->deleteLater();
 
             // When sync is done, set the connection
             this->doRPCSetConnection(connection);
@@ -97,8 +98,6 @@ void ConnectionLoader::doAutoConnect() {
 
         // While it is syncing, we'll show the status updates while it is alive.
         QObject::connect(syncTimer, &QTimer::timeout, [=]() {
-            //mkae sure to display the dialog
-            d->show();
             // Check the sync status
             if (isSyncing != nullptr && isSyncing->loadRelaxed()) {
                 main->statusLabel->setVisible(false);
@@ -138,8 +137,17 @@ void ConnectionLoader::doAutoConnect() {
             }
         });
 
-        syncTimer->setInterval(1* 1000);
+        syncTimer->setInterval(1 * 1000);
         syncTimer->start();
+
+
+        QObject::connect(syncDisplayTimer, &QTimer::timeout, [=]() {
+            //make sure to re-show the sync display if it gets closed
+            d->show();
+        });
+
+        syncDisplayTimer->setInterval(10 * 1000);
+        syncDisplayTimer->start();
 
     }, [=](QString err) {
         showError(err);
