@@ -16,8 +16,20 @@ void LiteInterface::setConnection(Connection* c) {
     conn = c;
 }
 
+void LiteInterface::setLoadingConnection(Connection* c) {
+    if (loadingConn) {
+        delete loadingConn;
+    }
+
+    loadingConn = c;
+}
+
 bool LiteInterface::haveConnection() {
     return conn != nullptr;
+}
+
+bool LiteInterface::haveLoadingConnection() {
+    return loadingConn != nullptr;
 }
 
 void LiteInterface::fetchAddresses(const std::function<void(json)>& cb) {
@@ -92,10 +104,10 @@ void LiteInterface::clearWallet(const std::function<void(json)>& cb) {
 }
 
 void LiteInterface::stopWallet(const std::function<void(json)>& cb) {
-    if (conn == nullptr)
+    if (loadingConn == nullptr)
         return;
 
-    conn->doRPCWithDefaultErrorHandling("quit", "", cb);
+    loadingConn->doRPCWithDefaultErrorHandling("stop", "", cb);
 }
 
 void LiteInterface::unlockWallet(QString password, const std::function<void(json)>& cb) {

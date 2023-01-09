@@ -35,7 +35,9 @@ public:
     ~LiteInterface();
 
     bool haveConnection();
+    bool haveLoadingConnection();
     void setConnection(Connection* c);
+    void setLoadingConnection(Connection* c);
     Connection* getConnection() { return conn; }
 
     void fetchUnspent             (const std::function<void(json)>& cb);
@@ -50,7 +52,7 @@ public:
 
     void fetchBalance(const std::function<void(json)>& cb);
 
-    void syncWallet(const std::function<void(json)>& cb, 
+    void syncWallet(const std::function<void(json)>& cb,
                         const std::function<void(QString)>& err);
 
     void createNewZaddr(bool sapling, const std::function<void(json)>& cb);
@@ -77,6 +79,7 @@ public:
 
 private:
     Connection*  conn                        = nullptr;
+    Connection*  loadingConn                 = nullptr;
 };
 
 #endif // ZCASHDRPC_H

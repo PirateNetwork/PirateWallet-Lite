@@ -69,6 +69,7 @@ void ConnectionLoader::doAutoConnect() {
     }
 
     auto connection = makeConnection(config);
+    rpc->setLoadingConnection(connection);
     auto me = this;
 
     // After the lib is initialized, try to do get info

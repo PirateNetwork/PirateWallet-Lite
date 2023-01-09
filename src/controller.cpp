@@ -84,6 +84,13 @@ void Controller::setConnection(Connection* c) {
     refresh(true);
 }
 
+// Called during initial sync to allow interupt
+void Controller::setLoadingConnection(Connection* c) {
+    if (c == nullptr) return;
+
+    this->zrpc->setLoadingConnection(c);
+}
+
 
 // Build the RPC JSON Parameters for this tx
 void Controller::fillTxJsonParams(json& json_tx, Tx tx) {
@@ -752,7 +759,7 @@ void Controller::refreshZECPrice() {
 
 void Controller::shutdownZcashd() {
     // Save the wallet and exit the lightclient library cleanly.
-    if (zrpc->haveConnection()) {
+    if (zrpc->haveLoadingConnection()) {
         QDialog d(main);
         Ui_ConnectionDialog connD;
         connD.setupUi(&d);
@@ -763,11 +770,6 @@ void Controller::shutdownZcashd() {
         bool finished = false;
 
         zrpc->stopWallet([&] (json) {
-            if (!finished)
-                d.accept();
-        });
-
-        zrpc->saveWallet([&] (json) {
             if (!finished)
                 d.accept();
             finished = true;
