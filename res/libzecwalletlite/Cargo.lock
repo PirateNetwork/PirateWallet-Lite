@@ -1600,7 +1600,7 @@ checksum = "8b870d8c151b6f2fb93e84a13146138f05d02ed11c7e7c54f8826aaaf7c9f184"
 [[package]]
 name = "piratewalletlitelib"
 version = "0.1.0"
-source = "git+https://github.com/piratenetwork/piratewallet-light-cli?rev=eddf6f595bc0d0cafba4285fdcee351f1f1a526d#eddf6f595bc0d0cafba4285fdcee351f1f1a526d"
+source = "git+https://github.com/piratenetwork/piratewallet-light-cli?rev=7e723dd0f6087bcbbcfc7d87e675e80a099270d5#7e723dd0f6087bcbbcfc7d87e675e80a099270d5"
 dependencies = [
  "arr_macro",
  "base58",
