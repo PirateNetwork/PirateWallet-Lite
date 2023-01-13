@@ -47,6 +47,8 @@ void ConnectionLoader::doAutoConnect() {
 
     if (!litelib_check_server(config->server.toStdString().c_str())) {
         config->server = Settings::getInstance()->setDefaultServer().server;
+    } else if (config->server.contains("cryptoforge", Qt::CaseInsensitive)) {
+        config->server = Settings::getInstance()->setDefaultServer().server;
     }
 
     // Initialize the library

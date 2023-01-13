@@ -2,6 +2,8 @@
 #include "settings.h"
 #include "camount.h"
 
+#include "../res/libzecwalletlite/piratewalletlitelib.h"
+
 Settings* Settings::instance = nullptr;
 
 Settings* Settings::init() {
@@ -180,7 +182,28 @@ void Settings::saveRestoreTableHeader(QTableView* table, QDialog* d, QString tab
 }
 
 QString Settings::getDefaultServer() {
-    return "https://lightd1.pirate.black:443/";
+
+    if (litelib_check_server("https://lightd1.pirate.black:443/")) {
+        return "https://lightd1.pirate.black:443/";
+    }
+
+    std::vector<QString> backUpServers = {"https://piratelightd1.cryptoforge.cc:443",
+                                         "https://piratelightd2.cryptoforge.cc:443",
+                                         "https://piratelightd3.cryptoforge.cc:443",
+                                         "https://piratelightd4.cryptoforge.cc:443"};
+
+    std::random_device rd;
+    std::mt19937 g(rd());
+    std::shuffle(backUpServers.begin(), backUpServers.end(), g);
+
+    for (uint i = 0; i<backUpServers.size(); i++) {
+        if (litelib_check_server(backUpServers[i].toStdString().c_str())) {
+            return backUpServers[i];
+        }
+    }
+
+    return "";
+
 }
 
 void Settings::openAddressInExplorer(QString address) {
