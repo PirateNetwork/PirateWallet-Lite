@@ -1,5 +1,7 @@
 #!/bin/bash
 
+export APP_VERSION="1.0.9"
+
 # Accept the variables as command line arguments as well
 POSITIONAL=()
 while [[ $# -gt 0 ]]
