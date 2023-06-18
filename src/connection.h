@@ -42,7 +42,10 @@ private:
 
     QTimer*                 syncTimer           = nullptr;
     QTimer*                 syncDisplayTimer    = nullptr;
+    QTimer*                 processingTimer     = nullptr;
     QAtomicInteger<bool>*   isSyncing           = nullptr;
+    QAtomicInteger<bool>*   isProcessing        = nullptr;
+    QAtomicInteger<bool>*   isSyncError         = nullptr;
 
     QDialog*                d                   = nullptr;
     Ui_ConnectionDialog*    connD               = nullptr;

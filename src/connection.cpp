@@ -82,22 +82,69 @@ void ConnectionLoader::doAutoConnect() {
 
         isSyncing = new QAtomicInteger<bool>();
         isSyncing->storeRelaxed(true);
+
+        isProcessing = new QAtomicInteger<bool>();
+        isProcessing->storeRelaxed(false);
+
+        isSyncError = new QAtomicInteger<bool>();
+        isSyncError->storeRelaxed(false);
+
         Settings::getInstance()->setSyncing(true);
 
         // Do a sync at startup
         syncTimer = new QTimer(main);
         syncDisplayTimer = new QTimer(main);
-        connection->doRPCWithDefaultErrorHandling("sync", "", [=](auto) {
-            isSyncing->storeRelaxed(false);
-            Settings::getInstance()->setSyncing(false);
+        processingTimer = new QTimer(main);
 
-            // Cancel the timer
-            syncTimer->deleteLater();
-            syncDisplayTimer->deleteLater();
+        QObject::connect(processingTimer, &QTimer::timeout, [=]() {
 
-            // When sync is done, set the connection
-            this->doRPCSetConnection(connection);
+            // if (isSyncing != nullptr && !isSyncing->loadRelaxed()) {
+                if (isProcessing != nullptr && !isProcessing->loadRelaxed()) {
+                    // Block multiple calls to doRPC
+                    isProcessing->storeRelaxed(true);
+                    isSyncError->storeRelaxed(false);
+
+                    connection->doRPC("sync", "", [=](json reply) {
+                        isProcessing->storeRelaxed(false);
+
+                        QString result;
+                        if (reply.find("result") != reply.end()) {
+                            result = QString::fromStdString(reply["result"].get<json::string_t>());
+                        }
+
+                        QString reason;
+                        if (reply.find("reason") != reply.end()) {
+                            reason = QString::fromStdString(reply["reason"].get<json::string_t>());
+                        }
+
+                        if (result == "success") {
+                            isProcessing->storeRelaxed(false);
+                            isSyncing->storeRelaxed(false);
+                            Settings::getInstance()->setSyncing(false);
+
+                            // Cancel the timer
+                            syncTimer->deleteLater();
+                            syncDisplayTimer->deleteLater();
+                            processingTimer->deleteLater();
+
+                            // When sync is done, set the connection
+                            this->doRPCSetConnection(connection);
+
+                        } else {
+                            //Show Sync error
+                            connection->showTxError(reason);
+                            isProcessing->storeRelaxed(false);
+                            isSyncError->storeRelaxed(true);
+
+                        }
+                    },
+                    [=](QString err) {
+                        qDebug() << "Sync error" << err;
+                    });
+                }
+            // }
         });
+
 
         // While it is syncing, we'll show the status updates while it is alive.
         QObject::connect(syncTimer, &QTimer::timeout, [=]() {
@@ -126,7 +173,11 @@ void ConnectionLoader::doAutoConnect() {
                             total = info["latest_block_height"].get<json::number_unsigned_t>();
                         }
 
-                        me->showInformation("Synced " + QString::number(endBlock + synced) + " / " + QString::number(total));
+                        if (isSyncing != nullptr && isSyncError->loadRelaxed()) {
+                            me->showInformation(QObject::tr("Sync error detected, retrying in a few seconds."));
+                        } else {
+                            me->showInformation(QObject::tr("Synced ") + QString::number(endBlock + synced) + " / " + QString::number(total));
+                        }
                     }
                     qApp->processEvents();
                 },
@@ -143,6 +194,8 @@ void ConnectionLoader::doAutoConnect() {
         syncTimer->setInterval(1 * 1000);
         syncTimer->start();
 
+        processingTimer->setInterval(10 * 1000);
+        processingTimer->start();
 
         QObject::connect(syncDisplayTimer, &QTimer::timeout, [=]() {
             //make sure to re-show the sync display if it gets closed
