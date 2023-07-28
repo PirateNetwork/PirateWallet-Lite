@@ -45,11 +45,13 @@ void ConnectionLoader::doAutoConnect() {
     config->dangerous = false;
     config->server = Settings::getInstance()->getSettings().server;
 
+    qDebug() << "Connecting to Server";
     if (!litelib_check_server(config->server.toStdString().c_str())) {
         config->server = Settings::getInstance()->setDefaultServer().server;
     } else if (config->server.contains("cryptoforge", Qt::CaseInsensitive)) {
         config->server = Settings::getInstance()->setDefaultServer().server;
     }
+    qDebug() << "Server Connected";
 
     // Initialize the library
     main->logger->write(QObject::tr("Attempting to initialize library with ") + config->server);
@@ -146,6 +148,15 @@ void ConnectionLoader::doAutoConnect() {
         });
 
 
+        infoEndBlocks = new QAtomicInteger<int>();
+        infoEndBlocks->storeRelaxed(0);
+
+        infoSyncdBlocks = new QAtomicInteger<int>();
+        infoSyncdBlocks->storeRelaxed(0);
+
+        infoTotalBlocks = new QAtomicInteger<int>();
+        infoTotalBlocks->storeRelaxed(0);
+
         // While it is syncing, we'll show the status updates while it is alive.
         QObject::connect(syncTimer, &QTimer::timeout, [=]() {
             // Check the sync status
@@ -157,26 +168,32 @@ void ConnectionLoader::doAutoConnect() {
                 connection->doRPC("syncstatus", "", [=](json reply) {
                     if (isSyncing != nullptr ) {
 
-                        qint64 endBlock = 0;
                         if (reply.find("end_block") != reply.end()) {
-                            endBlock = reply["end_block"].get<json::number_unsigned_t>();
+                            infoEndBlocks->storeRelaxed(reply["end_block"].get<json::number_unsigned_t>());
                         }
 
-                        qint64 synced = 0;
                         if (reply.find("synced_blocks") != reply.end()) {
-                            synced = reply["synced_blocks"].get<json::number_unsigned_t>();
+                            infoSyncdBlocks->storeRelaxed(reply["synced_blocks"].get<json::number_unsigned_t>());
                         }
 
-                        qint64 total = 0;
                         auto info = connection->getInfo();
                         if (info.find("latest_block_height") != info.end()) {
-                            total = info["latest_block_height"].get<json::number_unsigned_t>();
+                            infoTotalBlocks->storeRelaxed(info["latest_block_height"].get<json::number_unsigned_t>());
                         }
 
                         if (isSyncing != nullptr && isSyncError->loadRelaxed()) {
+
                             me->showInformation(QObject::tr("Sync error detected, retrying in a few seconds."));
                         } else {
-                            me->showInformation(QObject::tr("Synced ") + QString::number(endBlock + synced) + " / " + QString::number(total));
+                            if (infoEndBlocks->loadRelaxed() + infoSyncdBlocks->loadRelaxed() == 0) {
+                                me->showInformation(QObject::tr("Setting up connection to ") + QString::fromStdString(config->server.toStdString()));
+                            } else {
+                                if (infoEndBlocks->loadRelaxed() + infoSyncdBlocks->loadRelaxed() >  infoTotalBlocks->loadRelaxed()) {
+                                    me->showInformation(QObject::tr("Synced ") + QString::number(infoTotalBlocks->loadRelaxed()) + " / " + QString::number(infoTotalBlocks->loadRelaxed()));
+                                } else {
+                                    me->showInformation(QObject::tr("Synced ") + QString::number(infoEndBlocks->loadRelaxed() + infoSyncdBlocks->loadRelaxed()) + " / " + QString::number(infoTotalBlocks->loadRelaxed()));
+                                }
+                            }
                         }
                     }
                     qApp->processEvents();

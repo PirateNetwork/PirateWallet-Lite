@@ -47,6 +47,10 @@ private:
     QAtomicInteger<bool>*   isProcessing        = nullptr;
     QAtomicInteger<bool>*   isSyncError         = nullptr;
 
+    QAtomicInteger<int>*    infoEndBlocks       = nullptr;
+    QAtomicInteger<int>*    infoSyncdBlocks     = nullptr;
+    QAtomicInteger<int>*    infoTotalBlocks     = nullptr;
+
     QDialog*                d                   = nullptr;
     Ui_ConnectionDialog*    connD               = nullptr;
 
