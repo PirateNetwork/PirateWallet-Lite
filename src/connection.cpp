@@ -107,7 +107,6 @@ void ConnectionLoader::doAutoConnect() {
                     isSyncError->storeRelaxed(false);
 
                     connection->doRPC("sync", "", [=](json reply) {
-                        isProcessing->storeRelaxed(false);
 
                         QString result;
                         if (reply.find("result") != reply.end()) {
@@ -141,6 +140,9 @@ void ConnectionLoader::doAutoConnect() {
                         }
                     },
                     [=](QString err) {
+                        connection->showTxError(err);
+                        isProcessing->storeRelaxed(false);
+                        isSyncError->storeRelaxed(true);
                         qDebug() << "Sync error" << err;
                     });
                 }
