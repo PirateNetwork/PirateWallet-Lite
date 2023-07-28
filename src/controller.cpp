@@ -12,7 +12,7 @@ Controller::Controller(MainWindow* main) {
     auto cl = new ConnectionLoader(main, this);
 
     // Execute the load connection async, so we can set up the rest of RPC properly.
-    QTimer::singleShot(1, [=]() { cl->loadConnection(); });
+    QTimer::singleShot(1000, [=]() { cl->loadConnection(); });
 
     this->main = main;
     this->ui = main->ui;

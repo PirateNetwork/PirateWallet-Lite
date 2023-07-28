@@ -33,7 +33,7 @@ ConnectionLoader::~ConnectionLoader() {
 }
 
 void ConnectionLoader::loadConnection() {
-    QTimer::singleShot(1, [=]() { this->doAutoConnect(); });
+    QTimer::singleShot(1000, [=]() { this->doAutoConnect(); });
     if (!Settings::getInstance()->isHeadless())
         d->exec();
 }
