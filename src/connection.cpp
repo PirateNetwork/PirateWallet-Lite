@@ -171,16 +171,19 @@ void ConnectionLoader::doAutoConnect() {
                     if (isSyncing != nullptr ) {
 
                         if (reply.find("end_block") != reply.end()) {
-                            infoEndBlocks->storeRelaxed(reply["end_block"].get<json::number_unsigned_t>());
+                            if (reply["end_block"].get<json::number_unsigned_t>() > 0)
+                                infoEndBlocks->storeRelaxed(reply["end_block"].get<json::number_unsigned_t>());
                         }
 
                         if (reply.find("synced_blocks") != reply.end()) {
-                            infoSyncdBlocks->storeRelaxed(reply["synced_blocks"].get<json::number_unsigned_t>());
+                            if (reply["synced_blocks"].get<json::number_unsigned_t>() > 0)
+                                infoSyncdBlocks->storeRelaxed(reply["synced_blocks"].get<json::number_unsigned_t>());
                         }
 
                         auto info = connection->getInfo();
                         if (info.find("latest_block_height") != info.end()) {
-                            infoTotalBlocks->storeRelaxed(info["latest_block_height"].get<json::number_unsigned_t>());
+                            if (info["latest_block_height"].get<json::number_unsigned_t>() > 0)
+                                infoTotalBlocks->storeRelaxed(info["latest_block_height"].get<json::number_unsigned_t>());
                         }
 
                         if (isSyncing != nullptr && isSyncError->loadRelaxed()) {
