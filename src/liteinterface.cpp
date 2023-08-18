@@ -104,10 +104,17 @@ void LiteInterface::clearWallet(const std::function<void(json)>& cb) {
 }
 
 void LiteInterface::stopWallet(const std::function<void(json)>& cb) {
-    if (loadingConn == nullptr)
+    if (conn == nullptr)
         return;
 
-    loadingConn->doRPCWithDefaultErrorHandling("stop", "", cb);
+    conn->doRPCWithDefaultErrorHandling("stop", "", cb);
+}
+
+void LiteInterface::rescanWallet(const std::function<void(json)>& cb) {
+    if (conn == nullptr)
+        return;
+
+    conn->doRPCWithDefaultErrorHandling("rescan", "", cb);
 }
 
 void LiteInterface::unlockWallet(QString password, const std::function<void(json)>& cb) {
@@ -172,6 +179,15 @@ void LiteInterface::syncWallet(const std::function<void(json)>& cb,
 
     conn->doRPC("sync", "", cb, err);
 }
+
+void LiteInterface::syncStatus(const std::function<void(json)>& cb,
+                        const std::function<void(QString)>& err) {
+    if (conn == nullptr)
+        return;
+
+    conn->doRPC("syncstatus", "", cb, err);
+}
+
 
 /**
  * Method to get all the private keys for both z and R addresses. It will make 2 batch calls,

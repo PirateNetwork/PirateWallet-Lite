@@ -69,7 +69,7 @@ void Controller::setConnection(Connection* c) {
 
     ui->statusBar->showMessage("Ready!");
 
-    processInfo(c->getInfo());
+    // processInfo(c->getInfo());
 
     // If we're allowed to get the ARRR Price, get the prices
     if (Settings::getInstance()->getAllowFetchPrices())
@@ -78,6 +78,90 @@ void Controller::setConnection(Connection* c) {
     // If we're allowed to check for updates, check for a new release
     if (Settings::getInstance()->getCheckForUpdates())
         checkForUpdate();
+
+
+    isSyncing = new QAtomicInteger<bool>();
+    isSyncing->storeRelaxed(true);
+
+    infoEndBlocks = new QAtomicInteger<int>();
+    infoEndBlocks->storeRelaxed(0);
+
+    infoSyncdBlocks = new QAtomicInteger<int>();
+    infoSyncdBlocks->storeRelaxed(0);
+
+    chainHeight = new QAtomicInteger<int>();
+    chainHeight->storeRelaxed(0);
+
+    walletHeight = new QAtomicInteger<int>();
+    walletHeight->storeRelaxed(0);
+
+    price = new QAtomicInteger<int>();
+    price->storeRelaxed(0);
+
+    synctimer = new QTimer(main);
+    QObject::connect(synctimer, &QTimer::timeout, [=]() {
+
+        zrpc->fetchInfo([=] (const json& reply) {
+            // If success, set the connection
+            c->setInfo(reply);
+
+            if (reply.find("latest_block_height") != reply.end()) {
+                if (reply["latest_block_height"].get<json::number_unsigned_t>() > 0)
+                    chainHeight->storeRelaxed(reply["latest_block_height"].get<json::number_unsigned_t>());
+            }
+
+        }, [=](QString err) {
+            QMessageBox::critical(main, QObject::tr("Connection Error"), QObject::tr("There was an error connecting to pirated. The error was") + ": \n\n"
+                + err, QMessageBox::StandardButton::Ok);
+        });
+
+        zrpc->fetchLatestBlock([=] (const json& reply) {
+
+            if (reply.find("height") != reply.end()) {
+                if (reply["height"].get<json::number_unsigned_t>() > 0)
+                    walletHeight->storeRelaxed(reply["height"].get<json::number_unsigned_t>());
+            }
+        }, [=](QString err) {
+            QMessageBox::critical(main, QObject::tr("Connection Error"), QObject::tr("There was an error connecting to pirated. The error was") + ": \n\n"
+                + err, QMessageBox::StandardButton::Ok);
+        });
+
+
+        zrpc->syncStatus([=] (const json& reply) {
+
+            if (reply.find("end_block") != reply.end()) {
+                isSyncing->storeRelaxed(true);
+                if (reply["end_block"].get<json::number_unsigned_t>() > 0)
+                    infoEndBlocks->storeRelaxed(reply["end_block"].get<json::number_unsigned_t>());
+            } else {
+                isSyncing->storeRelaxed(false);
+            }
+
+            if (reply.find("synced_blocks") != reply.end()) {
+                if (reply["synced_blocks"].get<json::number_unsigned_t>() > 0)
+                    infoSyncdBlocks->storeRelaxed(reply["synced_blocks"].get<json::number_unsigned_t>());
+            }
+
+        }, [=](QString err) {
+            QMessageBox::critical(main, QObject::tr("Connection Error"), QObject::tr("There was an error connecting to pirated. The error was") + ": \n\n"
+                + err, QMessageBox::StandardButton::Ok);
+        });
+    });
+
+
+
+    QObject::connect(synctimer, &QTimer::timeout, [=]() {
+        if (isSyncing->loadRelaxed() && (infoEndBlocks->loadRelaxed() + infoSyncdBlocks->loadRelaxed() + 10 < chainHeight->loadRelaxed())) {
+              main->statusLabel->setText(" Syncing: " + QString::number(infoEndBlocks->loadRelaxed() + infoSyncdBlocks->loadRelaxed()) + " / " + QString::number(chainHeight->loadRelaxed())  );
+        } else {
+              main->statusLabel->setText(" Current Block: " + QString::number(walletHeight->loadRelaxed()) + " |" + " ARRR/USD=$" + QString::number(   ((double)price->loadRelaxed())/1000      ) );
+        }
+
+        qApp->processEvents();
+    });
+
+    synctimer->setInterval(1 * 1000);
+    synctimer->start();
 
     // Force update, because this might be coming from a settings update
     // where we need to immediately refresh
@@ -211,7 +295,7 @@ void Controller::getInfoThenRefresh(bool force) {
         int curBlock = reply["height"].get<json::number_integer_t>();
         bool doUpdate = force || (model->getLatestBlock() != curBlock);
 
-
+        price->storeRelaxed((int) Settings::getInstance()->getZECPrice()*1000);
 
         model->setLatestBlock(curBlock);
         ui->blockheight->setText(QString::number(curBlock));
@@ -224,8 +308,6 @@ void Controller::getInfoThenRefresh(bool force) {
         QIcon i(":/icons/res/connected.gif");
         QString chainName = Settings::getInstance()->isTestnet() ? "test" : "main";
         main->statusLabel->setVisible(true);
-        main->statusLabel->setText(chainName + "(" + QString::number(curBlock) + ")");
-        main->statusLabel->setText(" Current Block: " + QString::number(curBlock) + " |" + " ARRR/USD=$" + QString::number( (double) Settings::getInstance()->getZECPrice() ));
         main->statusLabel->setToolTip(tooltip);
         main->statusIcon->setPixmap(i.pixmap(16, 16));
         main->statusIcon->setToolTip(tooltip);
@@ -759,7 +841,7 @@ void Controller::refreshZECPrice() {
 
 void Controller::shutdownZcashd() {
     // Save the wallet and exit the lightclient library cleanly.
-    if (zrpc->haveLoadingConnection()) {
+    if (zrpc->haveConnection()) {
         QDialog d(main);
         Ui_ConnectionDialog connD;
         connD.setupUi(&d);

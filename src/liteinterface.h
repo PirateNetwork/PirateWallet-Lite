@@ -55,6 +55,9 @@ public:
     void syncWallet(const std::function<void(json)>& cb,
                         const std::function<void(QString)>& err);
 
+    void syncStatus(const std::function<void(json)>& cb,
+                        const std::function<void(QString)>& err);
+
     void createNewZaddr(bool sapling, const std::function<void(json)>& cb);
     // void createNewTaddr(const std::function<void(json)>& cb);
 
@@ -66,6 +69,7 @@ public:
     void clearWallet(const std::function<void(json)>& cb);
 
     void stopWallet(const std::function<void(json)>& cb);
+    void rescanWallet(const std::function<void(json)>& cb);
 
     void fetchWalletEncryptionStatus(const std::function<void(json)>& cb);
     void encryptWallet(QString password, const std::function<void(json)>& cb);

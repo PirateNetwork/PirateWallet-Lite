@@ -35,30 +35,30 @@ public:
     void setLoadingConnection(Connection* c);
 
     void refresh(bool force = false);
-    void refreshAddresses();    
-    
+    void refreshAddresses();
+
     void checkForUpdate(bool silent = true);
     void refreshZECPrice();
-    
-    void executeStandardUITransaction(Tx tx); 
 
-    void executeTransaction(Tx tx, 
+    void executeStandardUITransaction(Tx tx);
+
+    void executeTransaction(Tx tx,
         const std::function<void(QString txid)> submitted,
         const std::function<void(QString txid, QString errStr)> error);
 
     void fillTxJsonParams(json& params, Tx tx);
-    
+
     const TxTableModel*               getTransactionsModel() { return transactionsTableModel; }
 
     void shutdownZcashd();
     void noConnection();
     bool isEmbedded() { return ezcashd != nullptr; }
 
-    void encryptWallet(QString password, const std::function<void(json)>& cb) { 
-        zrpc->encryptWallet(password, cb); 
+    void encryptWallet(QString password, const std::function<void(json)>& cb) {
+        zrpc->encryptWallet(password, cb);
     }
-    
-    void removeWalletEncryption(QString password, const std::function<void(json)>& cb) { 
+
+    void removeWalletEncryption(QString password, const std::function<void(json)>& cb) {
                 zrpc->removeWalletEncryption(password, cb); }
 
     void saveWallet(const std::function<void(json)>& cb) { zrpc->saveWallet(cb); }
@@ -67,29 +67,31 @@ public:
 
     void stopWallet(const std::function<void(json)>& cb) { zrpc->stopWallet(cb); }
 
+    void rescanWallet(const std::function<void(json)>& cb) { zrpc->rescanWallet(cb); }
+
     void createNewZaddr(bool sapling, const std::function<void(json)>& cb) {
         unlockIfEncrypted([=] () {
             zrpc->createNewZaddr(sapling, cb);
         }, [=](){});
     }
-    // void createNewTaddr(const std::function<void(json)>& cb) { 
+    // void createNewTaddr(const std::function<void(json)>& cb) {
     //     unlockIfEncrypted([=] () {
-    //         zrpc->createNewTaddr(cb); 
+    //         zrpc->createNewTaddr(cb);
     //     }, [=](){});
     // }
 
-    void fetchPrivKey(QString addr, const std::function<void(json)>& cb) { 
+    void fetchPrivKey(QString addr, const std::function<void(json)>& cb) {
         unlockIfEncrypted([=] () {
-            zrpc->fetchPrivKey(addr, cb); 
+            zrpc->fetchPrivKey(addr, cb);
         },
         [=]() {
             cb({ {"error", "Failed to unlock wallet"} });
         });
     }
 
-    void fetchAllPrivKeys(const std::function<void(json)> cb) { 
+    void fetchAllPrivKeys(const std::function<void(json)> cb) {
         unlockIfEncrypted([=] () {
-            zrpc->fetchAllPrivKeys(cb); 
+            zrpc->fetchAllPrivKeys(cb);
         },
         [=]() {
             cb({ {"error", "Failed to unlock wallet"} });
@@ -98,7 +100,7 @@ public:
 
     void fetchSeed(const std::function<void(json)> cb) {
         unlockIfEncrypted([=] () {
-            zrpc->fetchSeed(cb); 
+            zrpc->fetchSeed(cb);
         },
         [=]() {
             cb({ {"error", "Failed to unlock wallet"} });
@@ -110,12 +112,12 @@ public:
 
     QString getDefaultSaplingAddress();
     // QString getDefaultTAddress();
-    
+
 private:
     void processInfo(const json&);
     void refreshBalances();
 
-    void refreshTransactions();    
+    void refreshTransactions();
 
     void processUnspent     (const json& reply, QMap<QString, CAmount>* newBalances, QList<UnspentOutput>* newUnspentOutputs);
     void updateUI           (bool anyUnconfirmed);
@@ -124,7 +126,7 @@ private:
     void getInfoThenRefresh (bool force);
 
     void unlockIfEncrypted  (std::function<void(void)> cb, std::function<void(void)> error);
-    
+
     QProcess*                   ezcashd                     = nullptr;
 
     TxTableModel*               transactionsTableModel      = nullptr;
@@ -134,12 +136,19 @@ private:
     LiteInterface*              zrpc;
 
     QTimer*                     timer;
+    QTimer*                     synctimer;
     QTimer*                     txTimer;
     QTimer*                     priceTimer;
 
     Ui::MainWindow*             ui;
     MainWindow*                 main;
 
+    QAtomicInteger<bool>*   isSyncing           = nullptr;
+    QAtomicInteger<int>*    infoEndBlocks       = nullptr;
+    QAtomicInteger<int>*    infoSyncdBlocks     = nullptr;
+    QAtomicInteger<int>*    walletHeight        = nullptr;
+    QAtomicInteger<int>*    chainHeight         = nullptr;
+    QAtomicInteger<int>*    price               = nullptr;
 
     // Current balance in the UI. If this number updates, then refresh the UI
     QString                     currentBalance;
