@@ -116,6 +116,7 @@ MainWindow::MainWindow(QWidget *parent) :
         this->getRPC()->stopWallet([=] (auto) {
         // This will start a sync, and show the scanning status.
             this->getRPC()->rescanWallet([=] (auto) {
+                  Settings::getInstance()->setSyncing(true);
                 //do nothing
             });
         });

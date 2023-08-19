@@ -144,6 +144,7 @@ private:
     MainWindow*                 main;
 
     QAtomicInteger<bool>*   isSyncing           = nullptr;
+    QAtomicInteger<int>*    syncingCounter      = nullptr;
     QAtomicInteger<int>*    infoEndBlocks       = nullptr;
     QAtomicInteger<int>*    infoSyncdBlocks     = nullptr;
     QAtomicInteger<int>*    walletHeight        = nullptr;

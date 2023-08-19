@@ -83,6 +83,11 @@ void Controller::setConnection(Connection* c) {
     isSyncing = new QAtomicInteger<bool>();
     isSyncing->storeRelaxed(true);
 
+    syncingCounter = new QAtomicInteger<int>();
+    syncingCounter->storeRelaxed(0);
+
+    Settings::getInstance()->setSyncing(true);
+
     infoEndBlocks = new QAtomicInteger<int>();
     infoEndBlocks->storeRelaxed(0);
 
@@ -97,6 +102,17 @@ void Controller::setConnection(Connection* c) {
 
     price = new QAtomicInteger<int>();
     price->storeRelaxed(0);
+
+    QTimer::singleShot(1, [=]() {
+        zrpc->syncWallet([=] (const json& reply) {
+
+        }, [=](QString err) {
+
+            QMessageBox::critical(main, QObject::tr("Connection Error"), QObject::tr("There was an error connecting to zcashd. The error was") + ": \n\n"
+                + err, QMessageBox::StandardButton::Ok);
+
+        });
+    });
 
     synctimer = new QTimer(main);
     QObject::connect(synctimer, &QTimer::timeout, [=]() {
@@ -130,11 +146,17 @@ void Controller::setConnection(Connection* c) {
         zrpc->syncStatus([=] (const json& reply) {
 
             if (reply.find("end_block") != reply.end()) {
-                isSyncing->storeRelaxed(true);
+                syncingCounter->storeRelaxed(0);
                 if (reply["end_block"].get<json::number_unsigned_t>() > 0)
                     infoEndBlocks->storeRelaxed(reply["end_block"].get<json::number_unsigned_t>());
             } else {
-                isSyncing->storeRelaxed(false);
+                int counter = syncingCounter->loadRelaxed();
+                counter++;
+                syncingCounter->storeRelaxed(counter);
+            }
+
+            if (Settings::getInstance()->isSyncing() && syncingCounter->loadRelaxed() > 30) {
+                Settings::getInstance()->setSyncing(false);
             }
 
             if (reply.find("synced_blocks") != reply.end()) {
@@ -151,6 +173,13 @@ void Controller::setConnection(Connection* c) {
 
 
     QObject::connect(synctimer, &QTimer::timeout, [=]() {
+
+        if (walletHeight->loadRelaxed() + 5 < chainHeight->loadRelaxed()) {
+            isSyncing->storeRelaxed(true);
+        } else {
+            isSyncing->storeRelaxed(false);
+        }
+
         if (isSyncing->loadRelaxed() && (infoEndBlocks->loadRelaxed() + infoSyncdBlocks->loadRelaxed() + 10 < chainHeight->loadRelaxed())) {
               main->statusLabel->setText(" Syncing: " + QString::number(infoEndBlocks->loadRelaxed() + infoSyncdBlocks->loadRelaxed()) + " / " + QString::number(chainHeight->loadRelaxed())  );
         } else {
@@ -263,6 +292,12 @@ void Controller::getInfoThenRefresh(bool force) {
         return noConnection();
 
     static bool prevCallSucceeded = false;
+
+    if (!isSyncing->loadRelaxed()) {
+        Settings::getInstance()->setSyncing(false);
+    } else {
+        Settings::getInstance()->setSyncing(true);
+    }
 
     if (!Settings::getInstance()->isSyncing()) {
         main->logger->write(QString("Run Sync Wallet "));
