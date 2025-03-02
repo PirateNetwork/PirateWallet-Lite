@@ -1,6 +1,6 @@
 #!/bin/bash
-QT_FOLDER="5.14"
-QT_VERSION="5.14.2"
+QT_FOLDER="5.15"
+QT_VERSION="5.15.16"
 
 
 #if [ -d res/qt ]; then
@@ -10,9 +10,9 @@ QT_VERSION="5.14.2"
 mkdir -p res/qt
 mkdir -p res/qt/shadowbuild
 
-#curl http://mirrors.ocf.berkeley.edu/qt/archive/qt/$QT_FOLDER/$QT_VERSION/single/qt-everywhere-src-$QT_VERSION.tar.xz -o res/qt/qt-everywhere-src-$QT_VERSION.tar.xz
-#tar -C res/qt -vxf res/qt/qt-everywhere-src-$QT_VERSION.tar.xz
-#rm -f res/qt/qt-everywhere-src-$QT_VERSION.tar.xz
+curl http://mirrors.ocf.berkeley.edu/qt/archive/qt/$QT_FOLDER/$QT_VERSION/single/qt-everywhere-opensource-src-$QT_VERSION.tar.xz -o res/qt/qt-everywhere-opensource-src-$QT_VERSION.tar.xz
+tar -C res/qt -vxf res/qt/qt-everywhere-opensource-src-$QT_VERSION.tar.xz
+rm -f res/qt/qt-everywhere-opensource-src-$QT_VERSION.tar.xz
 cd ./res/qt/
 QT_INSTALL="$PWD/static"
 
@@ -30,11 +30,11 @@ QT_CONFIG="$QT_CONFIG -qt-pcre"
 QT_CONFIG="$QT_CONFIG -qt-harfbuzz"
 QT_CONFIG="$QT_CONFIG -qt-zlib"
 
-QT_CONFIG="$QT_CONFIG -qt-xcb"
+#QT_CONFIG="$QT_CONFIG -qt-xcb"
 QT_CONFIG="$QT_CONFIG -no-xcb-xlib"
 QT_CONFIG="$QT_CONFIG -no-feature-xlib"
-QT_CONFIG="$QT_CONFIG -system-freetype"
-QT_CONFIG="$QT_CONFIG -fontconfig"
+#QT_CONFIG="$QT_CONFIG -system-freetype"
+#QT_CONFIG="$QT_CONFIG -fontconfig"
 QT_CONFIG="$QT_CONFIG -no-opengl"
 QT_CONFIG="$QT_CONFIG -no-feature-vulkan"
 

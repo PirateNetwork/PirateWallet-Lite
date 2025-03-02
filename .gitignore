@@ -1,3 +1,6 @@
+depends/sources/
+depends/work/
+res/libs/
 bin/
 debug/
 release/
@@ -6,7 +9,6 @@ artifacts/
 docs/website/public
 .vscode/
 scripts/buildrelease.sh
-res/libzecwalletlite.a
 res/zecwalletlite.lib
 res/libsodium.a
 res/libsodium/libsodium*

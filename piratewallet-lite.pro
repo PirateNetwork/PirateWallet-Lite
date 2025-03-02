@@ -138,24 +138,22 @@ else: unix:!android: target.path = /opt/$${TARGET}/bin
 !isEmpty(target.path): INSTALLS += target
 
 
-unix:       libsodium.target = $$PWD/res/unixlibs/libsodium.a
-else:win32: libsodium.target = $$PWD/res/win32libs/libsodium.a
-
-unix:        libpiratewalletlite.target   = $$PWD/res/unixlibs/libpiratewalletlite.a
-else:win32:  libpiratewalletlite.target   = $$PWD/res/win32libs/libpiratewalletlite.a
+libsodium.target = $$(PREFIX)/lib/libsodium.a
+libpiratewalletlite.target = $$PWD/res/libs/libpiratewalletlite.a
 
 QMAKE_EXTRA_TARGETS += libpiratewalletlite libsodium
-QMAKE_CLEAN += res/win32libs/libpiratewalletlite.a res/unixlibs/libpiratewalletlite.a res/unixlibs/libsodium.a res/win32libs/libsodium.a
+QMAKE_CLEAN += res/qt/libpiratewalletlite.a 
 
-win32: LIBS += -L$$PWD/res/win32libs -lpiratewalletlite -lsodium -lsecur32 -lcrypt32 -lncrypt -lntdll
-else:macx: LIBS += -framework Security -framework Foundation -L$$PWD/res/unixlibs -lpiratewalletlite -lsodium
-else:unix: LIBS += -L$$PWD/res/unixlibs -lsodium -lpiratewalletlite -ldl
+win32: LIBS += -L$$PWD/res/libs -L$$(PREFIX)/lib -lpiratewalletlite -lsodium -lsecur32 -lcrypt32 -lncrypt -lntdll
+else:macx: LIBS += -framework Security -framework Foundation -L$$PWD/res/libs -L$$(PREFIX)/lib -lpiratewalletlite -lsodium
+else:unix: LIBS += -L$$PWD/res/libs -L$$(PREFIX)/lib -lsodium -lpiratewalletlite -ldl
 
-win32:PRE_TARGETDEPS += $$PWD/res/win32libs/libpiratewalletlite.a $$PWD/res/win32libs/libsodium.a
-else:PRE_TARGETDEPS += $$PWD/res/unixlibs/libpiratewalletlite.a $$PWD/res/unixlibs/libsodium.a
+PRE_TARGETDEPS += $$PWD/res/libs/libpiratewalletlite.a $$(PREFIX)/lib/libsodium.a
 
-INCLUDEPATH += $$PWD/res
+INCLUDEPATH += $$(PREFIX)/lib/
+INCLUDEPATH += $$PWD/res/libs/
+
 DEPENDPATH += $$PWD/res
 
-
 DISTFILES +=
+
