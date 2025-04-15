@@ -27,7 +27,7 @@ printf "[OK]\n\n"
 
 
 printf "BUILD MXE Toolchain Library...............\n"
-"$ROOTFOLDER"/src/scripts/buildmxe.sh
+"$ROOTFOLDER"/utils/buildmxe.sh
 export PATH="$ROOTFOLDER"/res/mxe/usr/bin:"$PATH"
 export QT_STATIC="$ROOTFOLDER"/res/mxe/usr/x86_64-w64-mingw32.static/qt5
 printf "[OK]\n\n"
@@ -61,4 +61,6 @@ printf "[OK]\n\n"
 
 printf "Building QT Wallet...............\n"
 make -j4 > /dev/null 2>&1
-echo "[OK]\n\n"
+strip -s release/piratewallet-lite.exe
+cp -f release/piratewallet-lite.exe "$ROOTFOLDER"/bin/piratewallet-lite.exe
+printf "[OK]\n\n"
