@@ -18,6 +18,7 @@ res/unixlibs*
 res/win32libs*
 res/libzecwalletlite/open*
 res/qt*
+res/mxe*
 src/ui_*.h
 *.autosave
 src/precompiled.h.cpp

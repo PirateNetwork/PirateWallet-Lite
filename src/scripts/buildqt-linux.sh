@@ -20,8 +20,11 @@ cd shadowbuild
 
 QT_CONFIG="-opensource"
 QT_CONFIG="$QT_CONFIG -confirm-license"
+QT_CONFIG="$QT_CONFIG -opensource"
 QT_CONFIG="$QT_CONFIG -static"
 QT_CONFIG="$QT_CONFIG -release"
+
+QT_CONFIG="$QT_CONFIG -c++std c++17"
 QT_CONFIG="$QT_CONFIG -ltcg"
 
 QT_CONFIG="$QT_CONFIG -qt-libjpeg"
@@ -30,13 +33,7 @@ QT_CONFIG="$QT_CONFIG -qt-pcre"
 QT_CONFIG="$QT_CONFIG -qt-harfbuzz"
 QT_CONFIG="$QT_CONFIG -qt-zlib"
 
-#QT_CONFIG="$QT_CONFIG -qt-xcb"
-QT_CONFIG="$QT_CONFIG -no-xcb-xlib"
-QT_CONFIG="$QT_CONFIG -no-feature-xlib"
-#QT_CONFIG="$QT_CONFIG -system-freetype"
-#QT_CONFIG="$QT_CONFIG -fontconfig"
-QT_CONFIG="$QT_CONFIG -no-opengl"
-QT_CONFIG="$QT_CONFIG -no-feature-vulkan"
+
 
 QT_CONFIG="$QT_CONFIG -no-cups"
 QT_CONFIG="$QT_CONFIG -no-pch"
@@ -67,7 +64,7 @@ QT_CONFIG="$QT_CONFIG -no-use-gold-linker"
 
 QT_CONFIG="$QT_CONFIG -nomake examples"
 QT_CONFIG="$QT_CONFIG -nomake tests"
-QT_CONFIG="$QT_CONFIG -nomake tools"
+
 
 QT_CONFIG="$QT_CONFIG -skip qtactiveqt"
 QT_CONFIG="$QT_CONFIG -skip qtconnectivity"

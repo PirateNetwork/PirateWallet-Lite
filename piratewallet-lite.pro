@@ -33,16 +33,14 @@ MOC_DIR = bin
 OBJECTS_DIR = bin
 UI_DIR = src
 
-CONFIG += c++14
+CONFIG += c++1z
 
 SOURCES += \
     src/firsttimewizard.cpp \
     src/main.cpp \
     src/mainwindow.cpp \
     src/balancestablemodel.cpp \
-    src/3rdparty/qrcode/BitBuffer.cpp \
-    src/3rdparty/qrcode/QrCode.cpp \
-    src/3rdparty/qrcode/QrSegment.cpp \
+    src/3rdparty/qrcode/qrcodegen.cpp \
     src/settings.cpp \
     src/sendtab.cpp \
     src/txtablemodel.cpp \
@@ -68,9 +66,7 @@ HEADERS += \
     src/mainwindow.h \
     src/precompiled.h \
     src/balancestablemodel.h \
-    src/3rdparty/qrcode/BitBuffer.hpp \
-    src/3rdparty/qrcode/QrCode.hpp \
-    src/3rdparty/qrcode/QrSegment.hpp \
+    src/3rdparty/qrcode/qrcodegen.hpp \
     src/3rdparty/json/json.hpp \
     src/settings.h \
     src/txtablemodel.h \

@@ -7,6 +7,11 @@
 
 #include "version.h"
 
+//#ifdef _WIN32
+//#include <QtPlugin>
+//Q_IMPORT_PLUGIN(QWindow);
+//#endif
+
 class SignalHandler
 {
 public:

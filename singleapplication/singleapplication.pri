@@ -1,5 +1,5 @@
 QT += core network
-CONFIG += c++14
+CONFIG += c++1z
 
 HEADERS += $$PWD/singleapplication.h \
     $$PWD/singleapplication_p.h

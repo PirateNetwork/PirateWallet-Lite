@@ -6,9 +6,9 @@
 
 QT       += core gui network
 
-CONFIG += release
+CONFIG += precompile_header
 
-
+PRECOMPILED_HEADER = src/precompiled.h
 
 QT += widgets
 QT += websockets
@@ -33,16 +33,15 @@ MOC_DIR = bin
 OBJECTS_DIR = bin
 UI_DIR = src
 
-CONFIG += c++14
+CONFIG += c++1z
+QMAKE_LFLAGS += -static -static-libgcc -static-libstdc++ 
 
 SOURCES += \
     src/firsttimewizard.cpp \
     src/main.cpp \
     src/mainwindow.cpp \
     src/balancestablemodel.cpp \
-    src/3rdparty/qrcode/BitBuffer.cpp \
-    src/3rdparty/qrcode/QrCode.cpp \
-    src/3rdparty/qrcode/QrSegment.cpp \
+    src/3rdparty/qrcode/qrcodegen.cpp \
     src/settings.cpp \
     src/sendtab.cpp \
     src/txtablemodel.cpp \
@@ -68,9 +67,7 @@ HEADERS += \
     src/mainwindow.h \
     src/precompiled.h \
     src/balancestablemodel.h \
-    src/3rdparty/qrcode/BitBuffer.hpp \
-    src/3rdparty/qrcode/QrCode.hpp \
-    src/3rdparty/qrcode/QrSegment.hpp \
+    src/3rdparty/qrcode/qrcodegen.hpp \
     src/3rdparty/json/json.hpp \
     src/settings.h \
     src/txtablemodel.h \
@@ -138,21 +135,31 @@ else: unix:!android: target.path = /opt/$${TARGET}/bin
 !isEmpty(target.path): INSTALLS += target
 
 
-libsodium.target = $$(PREFIX)/lib/libsodium.a
+win32: libsodium.target = res/mxe/usr/x86_64-w64-mingw32.static/lib/libsodium.a
+else: libsodium.target = $$(PREFIX)/lib/libsodium.a
+
 libpiratewalletlite.target = $$PWD/res/libs/libpiratewalletlite.a
 
-QMAKE_EXTRA_TARGETS += libpiratewalletlite libsodium
+QMAKE_EXTRA_TARGETS += libpiratewalletlite libsodium 
 QMAKE_CLEAN += res/qt/libpiratewalletlite.a 
 
-win32: LIBS += -L$$PWD/res/libs -L$$(PREFIX)/lib -lpiratewalletlite -lsodium -lsecur32 -lcrypt32 -lncrypt -lntdll
+win32: LIBS += -L$$PWD/res/libs -L$$PWD/res/mxe/usr/x86_64-w64-mingw32.static/lib -lpiratewalletlite -lsodium  -lsecur32 -lcrypt32 -lncrypt -lntdll -lssp
 else:macx: LIBS += -framework Security -framework Foundation -L$$PWD/res/libs -L$$(PREFIX)/lib -lpiratewalletlite -lsodium
-else:unix: LIBS += -L$$PWD/res/libs -L$$(PREFIX)/lib lsodium -lpiratewalletlite -ldl
+else:unix: LIBS += -L$$PWD/res/libs -L$$(PREFIX)/lib lsodium -lpiratewalletlite -ldl 
 
-PRE_TARGETDEPS += $$PWD/res/libs/libpiratewalletlite.a $$(PREFIX)/lib/libsodium.a
+win32: PRE_TARGETDEPS += $$PWD/res/libs/libpiratewalletlite.a $$PWD/res/mxe/usr/x86_64-w64-mingw32.static/lib/libsodium.a
+else: PRE_TARGETDEPS += $$PWD/res/libs/libpiratewalletlite.a $$(PREFIX)/lib/libsodium.a 
 
-INCLUDEPATH += $$(PREFIX)/lib/
+win32: INCLUDEPATH += res/mxe/usr/x86_64-w64-mingw32.static/lib
+else: INCLUDEPATH += $$(PREFIX)/lib/
 INCLUDEPATH += $$PWD/res/libs/
 
+
 DEPENDPATH += $$PWD/res
+DEPENDPATH += $$PWD/res/libs/
+
+win32: DEPENDPATH += res/mxe/usr/x86_64-w64-mingw32.static/lib
+else: DEPENDPATH += $$(PREFIX)/lib/
+
 
 DISTFILES +=

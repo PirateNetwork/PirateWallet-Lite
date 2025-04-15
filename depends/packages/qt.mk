@@ -44,6 +44,8 @@ $(package)_config_opts += -qt-libpng
 $(package)_config_opts += -qt-pcre
 $(package)_config_opts += -qt-harfbuzz
 $(package)_config_opts += -qt-zlib
+$(package)_config_opts += -qt-tiff
+$(package)_config_opts += -qt-freetype
 
 $(package)_config_opts += -no-xcb-xlib
 $(package)_config_opts += -no-feature-xlib

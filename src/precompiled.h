@@ -73,7 +73,7 @@
 #include <QDesktopWidget>
 
 #include "3rdparty/json/json.hpp"
-#include "3rdparty/qrcode/QrCode.hpp"
+#include "3rdparty/qrcode/qrcodegen.hpp"
 
 #define SODIUM_STATIC
 #include "3rdparty/sodium.h"

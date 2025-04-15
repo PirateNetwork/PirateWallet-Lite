@@ -60,7 +60,7 @@ endif
 $(host_arch)_$(host_os)_prefix=$(BASEDIR)/$(host)
 $(host_arch)_$(host_os)_host=$(host)
 host_prefix=$($(host_arch)_$(host_os)_prefix)
-build_prefix=$(host_prefix)/native
+build_prefix=$(host_prefix)
 build_host=$(build)
 
 AT_$(V):=
@@ -170,7 +170,7 @@ download-osx:
 download-linux:
 	@$(MAKE) -s HOST=x86_64-unknown-linux-gnu download-one
 download-win:
-	@$(MAKE) -s HOST=x86_64-w64-mingw32 download-one
+	@$(MAKE) -s HOST=$(host) download-one
 download: download-osx download-linux download-win
 
 .PHONY: install cached download-one download-osx download-linux download-win download check-packages check-sources

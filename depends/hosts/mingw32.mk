@@ -1,5 +1,4 @@
-mingw32_CC=x86_64-w64-mingw32-gcc-posix
-mingw32_CXX=x86_64-w64-mingw32-g++-posix
+# MinGW32 makefile for building dependencies
 mingw32_CFLAGS=-pipe -std=c17
 mingw32_CXXFLAGS=-pipe -std=c++17
 
