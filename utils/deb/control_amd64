@@ -1,0 +1,9 @@
+Package: piratewallet-lite
+Version: RELEASE_VERSION
+Section: base
+Priority: optional
+Architecture: amd64
+Maintainer: Forge <cryptoforge.cc@protonmail.ch>
+Description: PirateWallet-Lite is a lightclient UI wallet for Pirate.
+ PirateWallet-Lite is a lightclient UI wallet for Pirate. It comes with
+ full support for shielded addresses and memos for Pirate.

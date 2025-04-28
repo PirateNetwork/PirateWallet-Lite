@@ -16,9 +16,8 @@ fi
 if [[ -z "${BUILD-}" ]]; then
     BUILD="$(./depends/config.guess)"
 fi
-if [[ -z "${HOST-}" ]]; then
-    HOST="$BUILD"
-fi
+
+HOST=aarch64-linux-gnu
 
 if [ -z $APP_VERSION ]; then echo "APP_VERSION is not set"; exit 1; fi
 if [ -z $PREV_VERSION ]; then echo "PREV_VERSION is not set"; exit 1; fi
@@ -62,7 +61,7 @@ rm -rf ./libs
 mkdir -p ./libs
 cd "$ROOTFOLDER"/res/libzecwalletlite
 SODIUM_LIB_DIR="$ROOTFOLDER"/depends/"$HOST"/lib/
-cargo build --lib --release 
+cargo build --lib --release --target aarch64-unknown-linux-gnu
 cp "$ROOTFOLDER"/res/libzecwalletlite/target/release/libpiratewalletlite.a "$ROOTFOLDER"/res/libs/libpiratewalletlite.a
 cd "$ROOTFOLDER"
 printf "[OK]\n\n"
@@ -116,7 +115,7 @@ mkdir -p $debdir > /dev/null
 mkdir    $debdir/DEBIAN
 mkdir -p $debdir/usr/local/bin
 
-cat utils/deb/control_amd64 | sed "s/RELEASE_VERSION/$APP_VERSION/g" > $debdir/DEBIAN/control
+cat utils/deb/control_aarch64 | sed "s/RELEASE_VERSION/$APP_VERSION/g" > $debdir/DEBIAN/control
 
 cp piratewallet-lite                   $debdir/usr/local/bin/
 
