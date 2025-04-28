@@ -4,6 +4,8 @@ export APP_VERSION="1.0.12"
 export PREV_VERSION="1.0.11"
 export PATH=$PATH:/usr/local/bin
 
+ROOTFOLDER=$(pwd)
+
 # Accept the variables as command line arguments as well
 POSITIONAL=()
 while [[ $# -gt 0 ]]
@@ -67,6 +69,7 @@ rm -rf src/*.so
 rm -rf src/*.d
 rm -rf src/*.dSYM
 rm -rf src/*.a
+rm .qmake.stash
 printf "[OK]\n"
 
 PREFIX="$(pwd)/depends/$BUILD/"
@@ -74,7 +77,7 @@ export PREFIX=$PREFIX
 printf "Building depends for $BUILD to $PREFIX\n"
 
 printf "Building Qt and Libsodium Library...............\n"
-HOST="$HOST" BUILD="$BUILD" "$MAKE" "$@" -C ./depends/ V=1
+HOST="$HOST" BUILD="$BUILD" make "$@" -C ./depends/ V=1
 printf "[OK]\n\n"
 
 export QT_STATIC="$ROOTFOLDER"/depends/"$HOST"
@@ -85,7 +88,7 @@ rm -rf ./libs
 mkdir -p ./libs
 cd "$ROOTFOLDER"/res/libzecwalletlite
 SODIUM_LIB_DIR="$ROOTFOLDER"/depends/"$HOST"/lib/
-cargo build --lib --release 
+cargo build --lib --release
 cp "$ROOTFOLDER"/res/libzecwalletlite/target/release/libpiratewalletlite.a "$ROOTFOLDER"/res/libs/libpiratewalletlite.a
 cd "$ROOTFOLDER"
 printf "[OK]\n\n"
@@ -96,7 +99,7 @@ printf "[OK]\n\n"
 
 printf "Building QT Wallet..............."
 "$QT_STATIC"/bin/qmake piratewallet-lite.pro CONFIG+=release > /dev/null
-make -j4 > /dev/null
+make -j4
 printf "[OK]\n\n"
 
 #Qt deploy
@@ -104,7 +107,7 @@ echo -n "Deploying.............."
 mkdir "$ROOTFOLDER"/artifacts >/dev/null 2>&1
 rm -f "$ROOTFOLDER"/artifcats/piratewallet-lite.dmg >/dev/null 2>&1
 rm -f "$ROOTFOLDER"/artifacts/rw* >/dev/null 2>&1
-$QT_STATIC/bin/macdeployqt piratewallet-lite.app
+#$QT_STATIC/bin/macdeployqt piratewallet-lite.app
 echo "[OK]"
 
 

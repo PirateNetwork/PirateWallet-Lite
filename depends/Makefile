@@ -6,7 +6,7 @@ SDK_PATH ?= $(BASEDIR)/SDKs
 NO_QT ?=
 NO_WALLET ?=
 NO_UPNP ?=
-FALLBACK_DOWNLOAD_PATH ?= https://github.com/PirateNetwork/Dependencies/raw/main/Treasure_Chest
+FALLBACK_DOWNLOAD_PATH ?= https://github.com/PirateNetwork/Dependencies/raw/main/Piratewallet-lite
 
 BUILD ?= $(shell ./config.guess)
 HOST ?= $(BUILD)
