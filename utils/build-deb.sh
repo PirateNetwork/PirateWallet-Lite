@@ -92,21 +92,21 @@ tar czf linux-piratewallet-lite-v$APP_VERSION.tar.gz piratewallet-lite-v$APP_VER
 cd "$ROOTFOLDER"
 
 mkdir "$ROOTFOLDER"/artifacts 
-cp "$ROOTFOLDER"/bin/linux-piratewallet-lite-v$APP_VERSION.tar.gz "$ROOTFOLDER"/artifacts/linux-binaries-piratewallet-lite-v$APP_VERSION.tar.gz
+cp "$ROOTFOLDER"/bin/linux-piratewallet-lite-v$APP_VERSION.tar.gz "$ROOTFOLDER"/artifacts/x86_64-linux-binaries-piratewallet-lite-v$APP_VERSION.tar.gz
 printf  "[OK]\n\n"
 
 
-if [ -f "$ROOTFOLDER"/artifacts/linux-binaries-piratewallet-lite-v$APP_VERSION.tar.gz ] ; then
+if [ -f "$ROOTFOLDER"/artifacts/x86_64-linux-binaries-piratewallet-lite-v$APP_VERSION.tar.gz ] ; then
     printf "Package contents.......\n"
     # Test if the package is built OK
-    if tar tf "$ROOTFOLDER/artifacts/linux-binaries-piratewallet-lite-v$APP_VERSION.tar.gz" | wc -l | grep -q "4"; then
+    if tar tf "$ROOTFOLDER/artifacts/x86_64-linux-binaries-piratewallet-lite-v$APP_VERSION.tar.gz" | wc -l | grep -q "4"; then
         printf "[OK]\n\n"
     else
         printf "[ERROR]\n\n"
         exit 1
     fi
 else
-    printf "[ERROR - artifacts/linux-binaries-piratewallet-lite-v$APP_VERSION.tar.gz not found]\n\n"
+    printf "[ERROR - artifacts/x86_64-linux-binaries-piratewallet-lite-v$APP_VERSION.tar.gz not found]\n\n"
     exit 1
 fi
 
@@ -127,6 +127,6 @@ mkdir -p $debdir/usr/share/applications
 cp src/scripts/desktopentry    $debdir/usr/share/applications/piratewallet-lite.desktop
 
 dpkg-deb --build $debdir >/dev/null
-cp $debdir.deb                 artifacts/linux-deb-piratewallet-lite-v$APP_VERSION.deb
+cp $debdir.deb                 artifacts/x86_64-linux-deb-piratewallet-lite-v$APP_VERSION.deb
 echo "[OK]"
 
