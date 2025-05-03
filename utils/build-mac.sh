@@ -69,6 +69,7 @@ rm -rf src/*.so
 rm -rf src/*.d
 rm -rf src/*.dSYM
 rm -rf src/*.a
+rm -rf PirateWallet-Lite.app
 rm .qmake.stash
 printf "[OK]\n"
 
