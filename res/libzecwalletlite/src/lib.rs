@@ -23,7 +23,7 @@ lazy_static! {
 
 // Check if there is an existing wallet
 #[no_mangle]
-pub extern fn litelib_wallet_exists() -> bool {
+pub extern "C" fn litelib_wallet_exists() -> bool {
     let config = LightClientConfig::create_unconnected(MainNetwork, None);
 
     println!("Wallet exists: {}", config.wallet_exists());
@@ -32,7 +32,7 @@ pub extern fn litelib_wallet_exists() -> bool {
 
 // Check that the server is valid
 #[no_mangle]
-pub extern fn litelib_check_server(server: *const c_char) -> bool {
+pub extern "C" fn litelib_check_server(server: *const c_char) -> bool {
     let server_str = unsafe {
         assert!(!server.is_null());
 
@@ -45,7 +45,7 @@ pub extern fn litelib_check_server(server: *const c_char) -> bool {
 
 /// Create a new wallet and return the seed for the newly created wallet.
 #[no_mangle]
-pub extern fn litelib_initialize_new(server: *const c_char) -> *mut c_char {
+pub extern "C" fn litelib_initialize_new(server: *const c_char) -> *mut c_char {
     let server_str = unsafe {
         assert!(!server.is_null());
 
@@ -91,7 +91,7 @@ pub extern fn litelib_initialize_new(server: *const c_char) -> *mut c_char {
 
 /// Restore a wallet from the seed phrase
 #[no_mangle]
-pub extern fn litelib_initialize_new_from_phrase(server: *const c_char,
+pub extern "C" fn litelib_initialize_new_from_phrase(server: *const c_char,
             seed: *const c_char, birthday: u64) -> *mut c_char {
 
     println!("Wallet Initialize: {}", "New from seed phrase");
@@ -137,7 +137,7 @@ pub extern fn litelib_initialize_new_from_phrase(server: *const c_char,
 
 // Initialize a new lightclient and store its value
 #[no_mangle]
-pub extern fn litelib_initialize_existing(server: *const c_char) -> *mut c_char {
+pub extern "C" fn litelib_initialize_existing(server: *const c_char) -> *mut c_char {
     let server_str = unsafe {
         assert!(!server.is_null());
 
@@ -173,7 +173,7 @@ pub extern fn litelib_initialize_existing(server: *const c_char) -> *mut c_char 
 }
 
 #[no_mangle]
-pub extern fn litelib_execute(cmd: *const c_char, args: *const c_char) -> *mut c_char {
+pub extern "C" fn litelib_execute(cmd: *const c_char, args: *const c_char) -> *mut c_char {
     let cmd_str = unsafe {
         assert!(!cmd.is_null());
 
@@ -214,9 +214,9 @@ pub extern fn litelib_execute(cmd: *const c_char, args: *const c_char) -> *mut c
  * back to rust, so it can be freed. Failure to call this function will result in a memory leak
  */
 #[no_mangle]
-pub extern fn litelib_rust_free_string(s: *mut c_char) {
+pub extern "C" fn litelib_rust_free_string(s: *mut c_char) {
     unsafe {
         if s.is_null() { return }
-        CString::from_raw(s)
+        drop(CString::from_raw(s))
     };
 }
