@@ -62,7 +62,7 @@ mkdir -p ./libs
 cd "$ROOTFOLDER"/res/libzecwalletlite
 SODIUM_LIB_DIR="$ROOTFOLDER"/depends/"$HOST"/lib/
 cargo build --lib --release --target aarch64-unknown-linux-gnu
-cp "$ROOTFOLDER"/res/libzecwalletlite/target/aarch64-unknown-linux-gnu/libpiratewalletlite.a "$ROOTFOLDER"/res/libs/libpiratewalletlite.a
+cp "$ROOTFOLDER"/res/libzecwalletlite/target/aarch64-unknown-linux-gnu/release/libpiratewalletlite.a "$ROOTFOLDER"/res/libs/libpiratewalletlite.a
 cd "$ROOTFOLDER"
 printf "[OK]\n\n"
 

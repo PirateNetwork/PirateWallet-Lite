@@ -115,6 +115,31 @@ $(package)_config_opts += -skip qtwebengine
 $(package)_config_opts += -v
 
 
+$(package)_config_opts_darwin += QMAKE_MACOSX_DEPLOYMENT_TARGET=$(OSX_MIN_VERSION)
+
+ifneq ($(build_os),darwin)
+$(package)_config_opts_darwin += -xplatform macx-clang-linux
+$(package)_config_opts_darwin += -device-option MAC_SDK_PATH=$(OSX_SDK)
+$(package)_config_opts_darwin += -device-option MAC_SDK_VERSION=$(OSX_SDK_VERSION)
+$(package)_config_opts_darwin += -device-option CROSS_COMPILE="$(host)-"
+$(package)_config_opts_darwin += -device-option MAC_TARGET=$(host)
+$(package)_config_opts_darwin += -device-option XCODE_VERSION=$(XCODE_VERSION)
+endif
+
+ifneq ($(build_arch),$(host_arch))
+$(package)_config_opts_aarch64_darwin += -device-option QMAKE_APPLE_DEVICE_ARCHS=arm64
+$(package)_config_opts_x86_64_darwin += -device-option QMAKE_APPLE_DEVICE_ARCHS=x86_64
+endif
+
+$(package)_config_opts_arm_linux += -platform linux-g++ -xplatform bitcoin-linux-g++
+$(package)_config_opts_i686_linux  = -xplatform linux-g++-32
+$(package)_config_opts_x86_64_linux = -xplatform linux-g++-64
+$(package)_config_opts_aarch64_linux = -xplatform linux-aarch64-gnu-g++
+$(package)_config_opts_powerpc64_linux = -platform linux-g++ -xplatform bitcoin-linux-g++
+$(package)_config_opts_powerpc64le_linux = -platform linux-g++ -xplatform bitcoin-linux-g++
+$(package)_config_opts_riscv64_linux = -platform linux-g++ -xplatform bitcoin-linux-g++
+$(package)_config_opts_s390x_linux = -platform linux-g++ -xplatform bitcoin-linux-g++
+
 $(package)_config_opts_mingw32 += -xplatform win32-g++
 $(package)_config_opts_mingw32 += -device-option CROSS_COMPILE="$(host)-"
 
