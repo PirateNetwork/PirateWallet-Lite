@@ -80,7 +80,7 @@ printf "[OK]\n\n"
 
 printf "Packaging..............\n"
 mkdir "$ROOTFOLDER"/bin/piratewallet-lite-v$APP_VERSION > /dev/null
-strip piratewallet-lite
+aarch64-linux-gnu-strip piratewallet-lite
 
 cp piratewallet-lite              "$ROOTFOLDER"/bin/piratewallet-lite-v$APP_VERSION > /dev/null
 cp README.md                      "$ROOTFOLDER"/bin/piratewallet-lite-v$APP_VERSION > /dev/null
