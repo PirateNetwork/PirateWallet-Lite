@@ -45,9 +45,9 @@ printf "[OK]\n"
 
 
 
-PREFIX="$(pwd)/depends/$BUILD/"
+PREFIX="$(pwd)/depends/$HOST/"
 export PREFIX=$PREFIX
-printf "Building depends for $BUILD to $PREFIX\n"
+printf "Building depends for $HOST to $PREFIX\n"
 
 printf "Building Qt and Libsodium Library...............\n"
 HOST="$HOST" BUILD="$BUILD" "$MAKE" "$@" -C ./depends/ V=1
@@ -61,6 +61,7 @@ rm -rf ./libs
 mkdir -p ./libs
 cd "$ROOTFOLDER"/res/libzecwalletlite
 SODIUM_LIB_DIR="$ROOTFOLDER"/depends/"$HOST"/lib/
+rustup target add aarch64-unknown-linux-gnu
 cargo build --lib --release --target aarch64-unknown-linux-gnu
 cp "$ROOTFOLDER"/res/libzecwalletlite/target/aarch64-unknown-linux-gnu/release/libpiratewalletlite.a "$ROOTFOLDER"/res/libs/libpiratewalletlite.a
 cd "$ROOTFOLDER"

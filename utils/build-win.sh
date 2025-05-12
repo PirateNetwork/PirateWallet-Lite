@@ -27,7 +27,7 @@ printf "[OK]\n\n"
 
 
 printf "BUILD MXE Toolchain Library...............\n"
-"$ROOTFOLDER"/utils/buildmxe.sh
+#"$ROOTFOLDER"/utils/buildmxe.sh
 export PATH="$ROOTFOLDER"/res/mxe/usr/bin:"$PATH"
 export QT_STATIC="$ROOTFOLDER"/res/mxe/usr/x86_64-w64-mingw32.static/qt5
 printf "[OK]\n\n"
@@ -39,7 +39,8 @@ mkdir -p ./libs
 cd "$ROOTFOLDER"/res/libzecwalletlite
 
 SODIUM_LIB_DIR="$ROOTFOLDER"/res/mxe/usr/x86_64-w64-mingw32.static/lib/
-cargo build --lib --release --target x86_64-pc-windows-gnu > /dev/null 2>&1
+rustup target add x86_64-pc-windows-gnu
+cargo build --lib --release --target x86_64-pc-windows-gnu 
 cp "$ROOTFOLDER"/res/libzecwalletlite/target/x86_64-pc-windows-gnu/release/libpiratewalletlite.a "$ROOTFOLDER"/res/libs/libpiratewalletlite.a
 cd "$ROOTFOLDER"
 printf "[OK]\n\n"
