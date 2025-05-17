@@ -7,6 +7,8 @@ $(package)_mingw32_dependencies = mxe
 $(package)_dependencies=
 $(package)_config_opts=
 $(package)_config_opts_aarch64=--build=$(BUILD)
+$(package)_cflags_aarch64_darwin += -arch arm64
+$(package)_ldflags_aarch64_darwin += -arch arm64
 
 define $(package)_set_vars
   $(package)_build_env=DO_NOT_UPDATE_CONFIG_SCRIPTS=1

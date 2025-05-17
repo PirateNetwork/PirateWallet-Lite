@@ -3,6 +3,7 @@
 export APP_VERSION="1.0.12"
 export PREV_VERSION="1.0.11"
 export PATH=$PATH:/usr/local/bin
+export MACOSX_DEPLOYMENT_TARGET=11.0
 
 ROOTFOLDER=$(pwd)
 
@@ -52,9 +53,8 @@ set -- "${POSITIONAL[@]}" # restore positional parameters
 if [[ -z "${BUILD-}" ]]; then
     BUILD="$(./depends/config.guess)"
 fi
-if [[ -z "${HOST-}" ]]; then
-    HOST="$BUILD"
-fi
+
+HOST=aarch64-apple-darwin
 
 if [ -z $APP_VERSION ]; then echo "APP_VERSION is not set"; exit 1; fi
 if [ -z $PREV_VERSION ]; then echo "PREV_VERSION is not set"; exit 1; fi
@@ -69,13 +69,12 @@ rm -rf src/*.so
 rm -rf src/*.d
 rm -rf src/*.dSYM
 rm -rf src/*.a
-rm -rf PirateWallet-Lite.app
 rm .qmake.stash
 printf "[OK]\n"
 
-PREFIX="$(pwd)/depends/$BUILD/"
+PREFIX="$(pwd)/depends/$HOST"
 export PREFIX=$PREFIX
-printf "Building depends for $BUILD to $PREFIX\n"
+printf "Building depends for $HOST to $PREFIX\n"
 
 printf "Building Qt and Libsodium Library...............\n"
 HOST="$HOST" BUILD="$BUILD" make "$@" -C ./depends/ V=1
@@ -89,8 +88,9 @@ rm -rf ./libs
 mkdir -p ./libs
 cd "$ROOTFOLDER"/res/libzecwalletlite
 SODIUM_LIB_DIR="$ROOTFOLDER"/depends/"$HOST"/lib/
-cargo build --lib --release
-cp "$ROOTFOLDER"/res/libzecwalletlite/target/release/libpiratewalletlite.a "$ROOTFOLDER"/res/libs/libpiratewalletlite.a
+rustup target add aarch64-apple-darwin
+cargo build --lib --release --target aarch64-apple-darwin
+cp "$ROOTFOLDER"/res/libzecwalletlite/target/aarch64-apple-darwin/release/libpiratewalletlite.a "$ROOTFOLDER"/res/libs/libpiratewalletlite.a
 cd "$ROOTFOLDER"
 printf "[OK]\n\n"
 
@@ -121,9 +121,9 @@ echo "[OK]"
 
 echo -n "Building dmg..........."
 mv piratewallet-lite.app PirateWallet-Lite.app
-create-dmg --volname "PirateWallet-Lite-v$APP_VERSION" --volicon "res/logo.icns" --window-pos 200 120 --icon "PirateWallet-Lite.app" 200 190  --app-drop-link 600 185 --hide-extension "PirateWallet-Lite.app"  --window-size 800 400 --hdiutil-quiet --background res/dmgbg.png  artifacts/x86_64-MacOS-piratewallet-lite-v$APP_VERSION.dmg PirateWallet-Lite.app >/dev/null 2>&1
+create-dmg --volname "PirateWallet-Lite-v$APP_VERSION" --volicon "res/logo.icns" --window-pos 200 120 --icon "PirateWallet-Lite.app" 200 190  --app-drop-link 600 185 --hide-extension "PirateWallet-Lite.app"  --window-size 800 400 --hdiutil-quiet --background res/dmgbg.png  artifacts/aarch64-MacOS-piratewallet-lite-v$APP_VERSION.dmg PirateWallet-Lite.app >/dev/null 2>&1
 
-if [ ! -f artifacts/x86_64-MacOS-piratewallet-lite-v$APP_VERSION.dmg ]; then
+if [ ! -f artifacts/aarch64-MacOS-piratewallet-lite-v$APP_VERSION.dmg ]; then
     echo "[ERROR]"
     exit 1
 fi
