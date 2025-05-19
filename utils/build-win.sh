@@ -27,7 +27,7 @@ printf "[OK]\n\n"
 
 
 printf "BUILD MXE Toolchain Library...............\n"
-#"$ROOTFOLDER"/utils/buildmxe.sh
+"$ROOTFOLDER"/utils/buildmxe.sh
 export PATH="$ROOTFOLDER"/res/mxe/usr/bin:"$PATH"
 export QT_STATIC="$ROOTFOLDER"/res/mxe/usr/x86_64-w64-mingw32.static/qt5
 printf "[OK]\n\n"
